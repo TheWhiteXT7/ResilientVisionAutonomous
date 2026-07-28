@@ -1,0 +1,10 @@
+# Paths are resolved relative to this configuration file.
+input_dataset: ../datasets/KITTI/training/image_2
+output_dataset: ../outputs/generated_images/kitti_laser
+metadata_location: ../outputs/generated_images/kitti_laser/metadata.csv
+pattern_directory: ../datasets/patterns
+output_image_format: png
+overwrite: false
+recursive_scanning: true
+random_pattern_selection: false
+random_seed: 20260728

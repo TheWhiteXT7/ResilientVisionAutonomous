@@ -1,0 +1,45 @@
+# Python bytecode and tooling
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Python and Conda environments
+.venv/
+venv/
+env/
+.env/
+.conda/
+conda-env/
+conda-meta/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# IDEs and operating systems
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Large local datasets and generated artifacts
+datasets/
+outputs/
+checkpoints/
+logs/
+*.ckpt
+*.pth
+*.pt
+
+# Notebook checkpoints
+.ipynb_checkpoints/
