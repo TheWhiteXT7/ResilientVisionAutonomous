@@ -1,14 +1,17 @@
-"""Tools for generating attacked autonomous-driving image datasets."""
+"""Dataset generator package for orchestrating dataset attack generation."""
 
-from .attack_pipeline import attack_image
-from .image_loader import discover_images, load_image
-from .pattern_manager import get_pattern, load_pattern, resize_pattern
+from .attack_executor import AttackExecutor
+from .dataset_generator import DatasetGenerator
+from .generator_config import GeneratorConfig
+from .metadata_writer import MetadataWriter
+from .output_manager import OutputManager
+from .progress_tracker import ProgressTracker
 
 __all__ = [
-    "attack_image",
-    "discover_images",
-    "get_pattern",
-    "load_image",
-    "load_pattern",
-    "resize_pattern",
+    "GeneratorConfig",
+    "AttackExecutor",
+    "MetadataWriter",
+    "OutputManager",
+    "ProgressTracker",
+    "DatasetGenerator",
 ]

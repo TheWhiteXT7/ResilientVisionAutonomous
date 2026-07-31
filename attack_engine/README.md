@@ -1,64 +1,127 @@
-# attack_engine
+# Attack Engine Layer
 
-`attack_engine` is a standalone extraction of the repository's rolling-shutter
-laser-pattern overlay. It has no dependency on TensorFlow, detectors, BDD100K,
-Docker, or evaluation scripts.
+The `attack_engine` package provides a dataset-agnostic, modular, and non-destructive rolling-shutter laser pattern attack implementation for the `ResilientVisionAutonomous` framework. It operates on standard `PIL.Image` objects using pure Pillow and Python standard library operations without dependencies on OpenCV or external ML frameworks.
 
-## Public API
+---
+
+## Architecture
+
+The attack engine separates pattern generation (geometry/data) from projection (rendering/blending):
+
+```
++------------------+
+|    PIL.Image     |
++--------+---------+
+         |
+         v
++------------------+     +------------------+
+| AttackConfig     | --> | PatternGenerator |
++------------------+     +--------+---------+
+                                  |
+                                  v
+                         +------------------+
+                         |   LaserPattern   |
+                         +--------+---------+
+                                  |
+                                  v
++------------------+     +------------------+
+|    PIL.Image     | --> | ProjectionEngine |
++------------------+     +--------+---------+
+                                  |
+                                  v
+                         +------------------+
+                         |  Attacked Image  |
+                         +------------------+
+```
+
+### Modular Responsibilities
+
+1. **`attack_config.py` (`AttackConfig`)**:
+   - Immutable dataclass storing configuration parameters: laser color (RGB), spot intensity, opacity alpha, Gaussian blur radius, spot radius, max spots, random seed, pattern type, and output dtype.
+   - Enforces parameter validation in `__post_init__`.
+
+2. **`laser_pattern.py` (`LaserSpot`, `LaserPattern`)**:
+   - `LaserSpot`: Immutable dataclass representing a single spot's position `(x, y)`, radius, intensity, and RGB color.
+   - `LaserPattern`: Container data structure representing collections of spots. Implements list operations (`add_spot`, `remove_spot`, `clear`, `__len__`, `__iter__`, `__getitem__`).
+   - Represents pure data; contains zero drawing or image manipulation logic.
+
+3. **`pattern_generator.py` (`PatternGenerator`)**:
+   - Dataset-agnostic pattern generator. Computes geometric spot layouts based on canvas dimensions and `AttackConfig`.
+   - Supports pattern strategies: `single_spot`, `random_spots`, `horizontal_line`, `vertical_line`, `grid`, and `custom`.
+   - Has zero dependency on Pillow and uses isolated random number generators for thread safety and zero global state.
+
+4. **`projection_engine.py` (`ProjectionEngine`)**:
+   - Renders a `LaserPattern` onto a `PIL.Image` using Pillow operations.
+   - Performs alpha blending, spot scaling, and optional Gaussian blurring.
+   - Guaranteed non-destructive execution: never modifies the original source image and always returns a new `PIL.Image`.
+
+5. **`attack_pipeline.py` (`AttackPipeline`, `apply_attack`)**:
+   - High-level orchestrator connecting `PatternGenerator` and `ProjectionEngine`.
+   - Exposes top-level `apply_attack(image, pattern_type="random", **kwargs)` API returning `(attacked_image, laser_pattern)`.
+
+6. **`utils.py`**:
+   - Helpers for array/PIL conversions and array pixel operations.
+
+---
+
+## Usage Example
 
 ```python
-from attack_engine import apply_attack
+from PIL import Image
+from attack_engine import AttackConfig, AttackPipeline, apply_attack
 
-attacked_image = apply_attack(image, pattern)
+# Load any PIL Image
+image = Image.open("sample.png")
+
+# Quick functional attack
+attacked_img, pattern = apply_attack(
+    image,
+    pattern_type="random",
+    laser_color=(255, 0, 0),
+    intensity=0.9,
+    alpha=0.8,
+    blur_radius=4.0,
+    spot_radius=12.0,
+    max_spots=6,
+    random_seed=42,
+)
+
+# Save or inspect the attacked image
+attacked_img.save("attacked_sample.png")
+print(f"Generated {len(pattern)} laser spots.")
 ```
 
-Both arguments must be RGB `numpy.ndarray` values with `dtype=np.uint8` and
-shape `(H, W, 3)`. They must have identical shapes. The return value is a new
-RGB `uint8` array with the same shape.
-
-The pixel operation is intentionally unchanged from the original repository:
-
-```text
-attacked_image = uint8(clip(float(image) + float(pattern), 0, 255))
-```
-
-## Files
-
-- `__init__.py` exposes the sole public API, `apply_attack`.
-- `attack_generator.py` validates the public RGB-image contract and delegates
-  to the extracted attack operation.
-- `apply_pattern.py` contains the original additive, saturating attack math and
-  its original dimensional/dtype checks.
-- `pattern_loader.py` optionally loads an RGB PNG/JPEG pattern into a `uint8`
-  NumPy array. It is separate because the public API accepts arrays directly.
-
-## Dependencies
-
-- Required: `numpy`.
-- Optional, only for `pattern_loader.load_rgb_pattern`: `Pillow`.
-
-## Usage
-
-With NumPy arrays:
+### Advanced Pipeline Usage
 
 ```python
-import numpy as np
-from attack_engine import apply_attack
+from attack_engine import AttackConfig, AttackPipeline, PatternGenerator, ProjectionEngine
 
-image = np.zeros((360, 640, 3), dtype=np.uint8)
-pattern = np.full((360, 640, 3), 40, dtype=np.uint8)
-attacked_image = apply_attack(image, pattern)
+config = AttackConfig(
+    laser_color=(0, 255, 0),
+    spot_radius=20.0,
+    blur_radius=8.0,
+    random_seed=123,
+)
+
+pipeline = AttackPipeline(config=config)
+
+# Apply grid attack
+grid_attacked, grid_pattern = pipeline.execute(image, pattern_type="grid", rows=4, cols=4)
+
+# Apply horizontal line attack
+line_attacked, line_pattern = pipeline.execute(image, pattern_type="horizontal_line")
 ```
 
-With a pattern image file:
+---
 
-```python
-from attack_engine import apply_attack
-from attack_engine.pattern_loader import load_rgb_pattern
+## Extension Points
 
-pattern = load_rgb_pattern("pattern.png")
-attacked_image = apply_attack(image, pattern)
-```
+1. **Custom Pattern Layouts**:
+   - Implement new methods in `PatternGenerator` (e.g. diagonal lines, spiral patterns, bounding-box targeting).
+   - Pass custom `LaserSpot` collections via `PatternGenerator.custom(spots)`.
 
-Patterns must already match the target image dimensions; resizing is not part
-of the original attack operation and is intentionally not performed here.
+2. **Custom Projection & Blending**:
+   - Extend or subclass `ProjectionEngine` to implement non-linear blending, physical refraction models, or optical distortion filters.
+
+3. **Data Logging and Provenance**:
+   - Serialize `LaserPattern` to JSON/CSV for exact reproducibility and dataset provenance tracking.
