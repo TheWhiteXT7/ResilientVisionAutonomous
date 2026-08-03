@@ -1,4 +1,28 @@
-numpy>=1.24
-Pillow>=10.0
+# ==========================
+# ResilientVisionAutonomous
+# Python 3.13+
+# ==========================
+
+# Deep Learning
+torch>=2.8.0
+torchvision>=0.23.0
+ultralytics>=8.3.0
+
+# Numerical Computing
+numpy>=2.3.0
+
+# Image Processing
+Pillow>=11.3.0
+opencv-python>=4.12.0
+
+# Configuration
 PyYAML>=6.0
-tqdm>=4.66
+
+# Visualization
+matplotlib>=3.10.0
+
+# Progress Bars
+tqdm>=4.67.0
+
+# Testing
+pytest>=9.1.0
