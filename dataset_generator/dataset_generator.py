@@ -1,6 +1,7 @@
 """DatasetGenerator orchestrator integrating KittiLoader, AttackPipeline, OutputManager, and ProgressTracker."""
 
 import logging
+import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -55,6 +56,25 @@ class DatasetGenerator:
         if split in ("test", "testing"):
             return "testing"
         return "training"
+
+    def _preserve_split_metadata(self) -> None:
+        """Copy source KITTI train/validation split files into generated output.
+
+        The attacked dataset retains the source split assignment, allowing later
+        YOLO preparation to use the same train/validation partition.
+        """
+        source_dir = getattr(self.loader, "kitti_dir", None)
+        if source_dir is None:
+            return
+        source_splits = Path(source_dir) / "ImageSets"
+        output_splits = self.output_manager.output_dir / "ImageSets"
+        output_splits.mkdir(parents=True, exist_ok=True)
+        for split_file in ("train.txt", "val.txt"):
+            source_file = source_splits / split_file
+            if source_file.is_file():
+                shutil.copy2(source_file, output_splits / split_file)
+            else:
+                logger.warning("Source KITTI split file not found: %s", source_file)
 
     def _process_sample(
         self,
@@ -140,6 +160,7 @@ class DatasetGenerator:
         """
         split_dir_name = self._get_split_dir_name()
         self.output_manager.setup_structure(split_dir_name)
+        self._preserve_split_metadata()
         self.progress_tracker.start(total_samples=1)
 
         try:
@@ -237,6 +258,7 @@ class DatasetGenerator:
         """
         split_dir_name = self._get_split_dir_name()
         self.output_manager.setup_structure(split_dir_name)
+        self._preserve_split_metadata()
         self.progress_tracker.start(total_samples=len(sample_ids))
 
         for sid in sample_ids:
@@ -258,3 +280,6 @@ class DatasetGenerator:
         if self.config.save_metadata:
             summary_path = self.output_manager.output_dir / "generation_summary.json"
             self.output_manager.metadata_writer.write_dataset_summary(summary_path, report)
+
+
+

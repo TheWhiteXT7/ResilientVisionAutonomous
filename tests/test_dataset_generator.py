@@ -28,6 +28,10 @@ class TestDatasetGenerator(unittest.TestCase):
         self.img_dir.mkdir(parents=True, exist_ok=True)
         self.lbl_dir.mkdir(parents=True, exist_ok=True)
         self.cal_dir.mkdir(parents=True, exist_ok=True)
+        self.splits_dir = self.kitti_dir / "ImageSets"
+        self.splits_dir.mkdir(parents=True, exist_ok=True)
+        (self.splits_dir / "train.txt").write_text("000000\n000001\n000002\n", encoding="utf-8")
+        (self.splits_dir / "val.txt").write_text("000002\n", encoding="utf-8")
 
         # Create 3 synthetic samples: 000000, 000001, 000002
         for sid in ("000000", "000001", "000002"):
@@ -87,6 +91,10 @@ class TestDatasetGenerator(unittest.TestCase):
             self.assertTrue((out_lbl_dir / f"{sid}.txt").exists())
             self.assertTrue((out_cal_dir / f"{sid}.txt").exists())
             self.assertTrue((out_meta_dir / f"{sid}.json").exists())
+
+        # Preserve source KITTI split metadata for downstream YOLO preparation
+        self.assertEqual((self.output_dir / "ImageSets" / "train.txt").read_text(encoding="utf-8"), "000000\n000001\n000002\n")
+        self.assertEqual((self.output_dir / "ImageSets" / "val.txt").read_text(encoding="utf-8"), "000002\n")
 
         # Verify generation summary file created
         self.assertTrue((self.output_dir / "generation_summary.json").exists())
@@ -148,3 +156,5 @@ class TestDatasetGenerator(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
