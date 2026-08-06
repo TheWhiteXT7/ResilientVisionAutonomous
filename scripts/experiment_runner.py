@@ -20,6 +20,7 @@ from models.utils import prepare_yolo_dataset
 from models.yolo_config import YoloConfig
 from models.trainer import YoloTrainer
 from models.evaluator import YoloEvaluator
+from models.yolo_dataset import YoloDataset
 from dataset_generator.dataset_generator import DatasetGenerator
 from dataset_generator.generator_config import GeneratorConfig
 
@@ -68,7 +69,7 @@ def run_baseline(exp_dir: Path, args: argparse.Namespace) -> Dict[str, Any]:
         loader = KittiLoader(split="train", load_images=False)
         prepare_yolo_dataset(loader, output_dir=shared_data_yaml.parent)
 
-    # Load YAML to discover dataset root path for KittiLoader
+    # Load YAML to validate the prepared YOLO dataset; it is not a KITTI root.
     try:
         import yaml
 
@@ -150,13 +151,13 @@ def run_baseline(exp_dir: Path, args: argparse.Namespace) -> Dict[str, Any]:
     # NOTE: pass the shared data.yaml path so Ultralytics reads images/labels in-place
     trainer.train(dataset=None, data_yaml_path=shared_data_yaml)
 
-    # Evaluate on the validation split located under the shared dataset root
-    val_loader = KittiLoader(kitti_dir=str(ds_root), split="val", load_images=False)
+    # Evaluate the validation split referenced by the shared YOLO data.yaml.
+    val_dataset = YoloDataset.from_yaml(shared_data_yaml, split="val")
     evaluator = YoloEvaluator()
     from models.predictor import YoloPredictor
 
     predictor = YoloPredictor(wrapper=trainer.wrapper)
-    report = evaluator.evaluate_dataset(dataset=val_loader, predictor=predictor, dataset_name="baseline_val")
+    report = evaluator.evaluate_dataset(dataset=val_dataset, predictor=predictor, dataset_name="baseline_val")
 
     # Persist lightweight experiment artifacts only
     _save_json(exp_dir / "config.json", cfg.to_dict())
@@ -199,10 +200,10 @@ def run_attack_stage(stage: str, exp_dir: Path, args: argparse.Namespace, patter
     trainer.train(dataset=None, data_yaml_path=data_yaml)
 
     # Evaluate
-    val_loader = KittiLoader(kitti_dir=str(exp_dir / "dataset_prepared"), split="val", load_images=False)
+    val_dataset = YoloDataset.from_yaml(data_yaml, split="val")
     evaluator = YoloEvaluator()
     predictor = __import__("models.predictor", fromlist=["YoloPredictor"]).YoloPredictor(wrapper=trainer.wrapper)
-    report = evaluator.evaluate_dataset(dataset=val_loader, predictor=predictor, dataset_name=stage)
+    report = evaluator.evaluate_dataset(dataset=val_dataset, predictor=predictor, dataset_name=stage)
     report.save_json(exp_dir / "metrics.json")
 
     # copy weights
@@ -252,3 +253,5 @@ def main(argv: Any = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+

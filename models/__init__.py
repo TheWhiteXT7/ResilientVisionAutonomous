@@ -25,6 +25,7 @@ from models.utils import (
 from models.visualizer import YoloVisualizer
 from models.yolo_config import YoloConfig
 from models.yolo_wrapper import YoloWrapper
+from models.yolo_dataset import YoloAnnotation, YoloDataset, YoloSample
 
 __all__ = [
     "YoloConfig",
@@ -48,4 +49,8 @@ __all__ = [
     "yolo_bbox_to_kitti",
     "prepare_yolo_dataset",
     "get_default_class_mapping",
+    "YoloAnnotation",
+    "YoloSample",
+    "YoloDataset",
 ]
+

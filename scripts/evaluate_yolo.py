@@ -11,6 +11,7 @@ from typing import Any, Dict, Optional
 from models.yolo_wrapper import YoloWrapper
 from models.predictor import YoloPredictor
 from models.evaluator import YoloEvaluator
+from models.yolo_dataset import YoloDataset
 from dataset_loader.kitti_loader import KittiLoader
 from models.utils import prepare_yolo_dataset
 
@@ -43,15 +44,10 @@ def main(argv: Any = None) -> int:
     if data_arg:
         data_p = Path(data_arg)
         if data_p.is_file() and data_p.suffix in (".yaml", ".yml"):
-            # data.yaml contains path to dataset
-            import yaml
-
-            with open(data_p, "r", encoding="utf-8") as f:
-                y = yaml.safe_load(f)
-            base_path = Path(y.get("path", "."))
-            dataset = KittiLoader(kitti_dir=base_path, split="val", load_images=False)
+            dataset = YoloDataset.from_yaml(data_p, split="val")
         elif data_p.is_dir():
-            dataset = KittiLoader(kitti_dir=data_p, split="val", load_images=False)
+            yolo_yaml = data_p / "data.yaml"
+            dataset = YoloDataset.from_yaml(yolo_yaml, split="val") if yolo_yaml.is_file() else KittiLoader(kitti_dir=data_p, split="val", load_images=False)
         else:
             logger.error("Unsupported --data argument: %s", data_arg)
             return 2
@@ -82,3 +78,4 @@ def main(argv: Any = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
