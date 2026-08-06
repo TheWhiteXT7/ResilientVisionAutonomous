@@ -194,8 +194,9 @@ def run_attack_stage(stage: str, exp_dir: Path, args: argparse.Namespace, patter
     generator = DatasetGenerator(config=gen_cfg)
     generator.generate_dataset(pattern_type=pattern_type)
 
-    # Prepare YOLO dataset
-    data_yaml = prepare_yolo_dataset(out_ds_dir, output_dir=exp_dir / "dataset_prepared")
+    # Convert the generated KITTI-format attack output through its loader.
+    attacked_loader = KittiLoader(kitti_dir=out_ds_dir, split="train", load_images=False)
+    data_yaml = prepare_yolo_dataset(attacked_loader, output_dir=exp_dir / "dataset_prepared")
 
     cfg = YoloConfig.from_dict({
         "model_name": "yolov8n.pt",
@@ -262,6 +263,7 @@ def main(argv: Any = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 
 
 
