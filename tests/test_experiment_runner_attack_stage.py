@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import Image
 
 
-def test_random_attack_prepares_non_empty_yolo_train_images(monkeypatch, tmp_path: Path) -> None:
+def test_random_attack_prepares_non_empty_yolo_train_and_val_images(monkeypatch, tmp_path: Path) -> None:
     from scripts import experiment_runner
 
     class Generator:
@@ -61,3 +61,6 @@ def test_random_attack_prepares_non_empty_yolo_train_images(monkeypatch, tmp_pat
     )
 
     assert list((tmp_path / "experiment" / "dataset_prepared" / "images" / "train").glob("*.png"))
+
+    assert list((tmp_path / "experiment" / "dataset_prepared" / "images" / "val").glob("*.png"))
+
