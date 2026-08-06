@@ -27,6 +27,14 @@ from dataset_generator.generator_config import GeneratorConfig
 logger = logging.getLogger(__name__)
 
 
+def _parse_device(value: str) -> str:
+    """Accept CPU, CUDA, or a non-negative CUDA device index."""
+    device = value.lower()
+    if device in {"cpu", "cuda"} or device.isdigit():
+        return device
+    raise argparse.ArgumentTypeError("device must be 'cpu', 'cuda', or a non-negative GPU index")
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Run a set of YOLO experiments end-to-end")
     p.add_argument("--stages", nargs="*", choices=["baseline", "random_attack", "target_attack", "defense", "custom"], default=["baseline"], help="Which experiment stages to run")
@@ -35,6 +43,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--batch-size", type=int, default=16)
+    p.add_argument("--device", type=_parse_device, default="cpu", help="Compute device: cpu, cuda, or a GPU index such as 0")
     return p
 
 
@@ -142,7 +151,7 @@ def run_baseline(exp_dir: Path, args: argparse.Namespace) -> Dict[str, Any]:
         "model_name": "yolov8n.pt",
         "epochs": args.epochs,
         "batch_size": args.batch_size,
-        "device": "cpu",
+        "device": args.device,
         "project_directory": exp_dir,
         "experiment_name": "baseline",
     })
@@ -192,7 +201,7 @@ def run_attack_stage(stage: str, exp_dir: Path, args: argparse.Namespace, patter
         "model_name": "yolov8n.pt",
         "epochs": args.epochs,
         "batch_size": args.batch_size,
-        "device": "cpu",
+        "device": args.device,
         "project_directory": exp_dir,
         "experiment_name": stage,
     })
@@ -253,5 +262,6 @@ def main(argv: Any = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 
 
