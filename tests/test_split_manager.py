@@ -33,6 +33,15 @@ class TestSplitManager(unittest.TestCase):
         loaded_ids = self.manager.load_split("train")
         self.assertEqual(loaded_ids, sample_ids)
 
+    def test_load_trainval_merges_train_and_val_ids(self) -> None:
+        """trainval combines train and val split files without duplicates."""
+        self.manager.save_split("train", ["000000", "000001"])
+        self.manager.save_split("val", ["000001", "000002"])
+
+        self.assertEqual(
+            self.manager.load_split("trainval"),
+            ["000000", "000001", "000002"],
+        )
     def test_load_split_not_found(self) -> None:
         """Test loading non-existent split raises FileNotFoundError."""
         with self.assertRaises(FileNotFoundError):
@@ -70,3 +79,4 @@ class TestSplitManager(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

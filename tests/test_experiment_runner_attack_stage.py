@@ -7,8 +7,19 @@ from PIL import Image
 def test_random_attack_prepares_non_empty_yolo_train_and_val_images(monkeypatch, tmp_path: Path) -> None:
     from scripts import experiment_runner
 
+    captured = {}
+    source_loader = object()
+    real_kitti_loader = experiment_runner.KittiLoader
+
+    def loader_factory(kitti_dir=None, split="train", load_images=False, **kwargs):
+        if kitti_dir is None:
+            assert split == "trainval"
+            return source_loader
+        return real_kitti_loader(kitti_dir=kitti_dir, split=split, load_images=load_images, **kwargs)
+
     class Generator:
-        def __init__(self, config):
+        def __init__(self, loader, config):
+            captured["loader"] = loader
             self.output_dir = Path(config.output_directory)
 
         def generate_dataset(self, **_kwargs):
@@ -51,6 +62,7 @@ def test_random_attack_prepares_non_empty_yolo_train_and_val_images(monkeypatch,
         def evaluate_dataset(self, **_kwargs):
             return Report()
 
+    monkeypatch.setattr(experiment_runner, "KittiLoader", loader_factory)
     monkeypatch.setattr(experiment_runner, "DatasetGenerator", Generator)
     monkeypatch.setattr(experiment_runner, "YoloTrainer", Trainer)
     monkeypatch.setattr(experiment_runner, "YoloEvaluator", Evaluator)
@@ -60,7 +72,10 @@ def test_random_attack_prepares_non_empty_yolo_train_and_val_images(monkeypatch,
         "random_attack", tmp_path / "experiment", Namespace(epochs=1, batch_size=1, device="cpu")
     )
 
+    assert captured["loader"] is source_loader
     assert list((tmp_path / "experiment" / "dataset_prepared" / "images" / "train").glob("*.png"))
 
     assert list((tmp_path / "experiment" / "dataset_prepared" / "images" / "val").glob("*.png"))
+
+
 

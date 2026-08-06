@@ -49,6 +49,15 @@ class SplitManager:
         Raises:
             FileNotFoundError: If the split file does not exist.
         """
+        if split_name == "trainval":
+            train_ids = self.load_split("train")
+            val_ids = self.load_split("val")
+            sample_ids = sorted(set(train_ids).union(val_ids))
+            logger.info(
+                "Loaded %d unique sample IDs for combined split 'trainval'",
+                len(sample_ids),
+            )
+            return sample_ids
         file_name = (
             f"{split_name}.txt"
             if not split_name.endswith(".txt")
@@ -128,6 +137,15 @@ class SplitManager:
             Path to the saved split text file.
         """
         self.splits_dir.mkdir(parents=True, exist_ok=True)
+        if split_name == "trainval":
+            train_ids = self.load_split("train")
+            val_ids = self.load_split("val")
+            sample_ids = sorted(set(train_ids).union(val_ids))
+            logger.info(
+                "Loaded %d unique sample IDs for combined split 'trainval'",
+                len(sample_ids),
+            )
+            return sample_ids
         file_name = (
             f"{split_name}.txt"
             if not split_name.endswith(".txt")
@@ -141,3 +159,5 @@ class SplitManager:
 
         logger.info(f"Saved {len(sample_ids)} sample IDs to {split_path}")
         return split_path
+
+

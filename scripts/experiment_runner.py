@@ -191,7 +191,8 @@ def run_attack_stage(stage: str, exp_dir: Path, args: argparse.Namespace, patter
     # Generate attacked dataset into a subfolder of exp_dir
     out_ds_dir = exp_dir / "dataset_attacked"
     gen_cfg = GeneratorConfig(output_directory=str(out_ds_dir))
-    generator = DatasetGenerator(config=gen_cfg)
+    attack_loader = KittiLoader(split="trainval", load_images=False)
+    generator = DatasetGenerator(loader=attack_loader, config=gen_cfg)
     generator.generate_dataset(pattern_type=pattern_type)
 
     # Convert the generated KITTI-format attack output through its loader.
@@ -263,6 +264,7 @@ def main(argv: Any = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 
 
 

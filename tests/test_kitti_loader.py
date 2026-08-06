@@ -76,6 +76,17 @@ class TestKittiLoader(unittest.TestCase):
         self.assertEqual(len(sample_0.annotations), 1)
         self.assertEqual(sample_0.annotations[0].class_name, "Car")
 
+    def test_kitti_loader_trainval_split(self) -> None:
+        """trainval uses the union of KITTI train and validation split files."""
+        split_dir = self.kitti_dir / "ImageSets"
+        split_dir.mkdir()
+        (split_dir / "train.txt").write_text("000000\n", encoding="utf-8")
+        (split_dir / "val.txt").write_text("000001\n", encoding="utf-8")
+
+        loader = KittiLoader(kitti_dir=self.kitti_dir, split="trainval")
+
+        self.assertEqual(len(loader), 2)
+        self.assertEqual(loader.sample_ids, ["000000", "000001"])
     def test_kitti_loader_string_id_access(self) -> None:
         """Test retrieving sample by string ID."""
         loader = KittiLoader(kitti_dir=self.kitti_dir, split="train")
@@ -136,3 +147,4 @@ class TestKittiLoader(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
