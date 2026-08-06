@@ -50,12 +50,93 @@ def _save_json(path: Path, obj: Dict[str, Any]) -> None:
 
 
 def run_baseline(exp_dir: Path, args: argparse.Namespace) -> Dict[str, Any]:
-    logger.info("Running baseline: prepare dataset, train, evaluate")
-    # Prepare dataset from KITTI
-    loader = KittiLoader(split="train", load_images=False)
-    data_yaml = prepare_yolo_dataset(loader, output_dir=exp_dir / "dataset")
+    """Run the baseline experiment reusing the prepared YOLO dataset.
 
-    # Configure training
+    Behavior changes:
+    - Reuse outputs/yolo_dataset/data.yaml when available.
+    - Do NOT create or copy image/label files into the experiment directory.
+    - If the dataset YAML is missing, call prepare_yolo_dataset() once to create it
+      under OUTPUTS_DIR / 'yolo_dataset'.
+    """
+    logger.info("Running baseline: using shared YOLO dataset (no duplication)")
+
+    shared_data_yaml = OUTPUTS_DIR / "yolo_dataset" / "data.yaml"
+
+    # Ensure a prepared YOLO dataset exists at outputs/yolo_dataset
+    if not shared_data_yaml.exists():
+        logger.info("Shared YOLO dataset not found at %s. Preparing...", shared_data_yaml)
+        loader = KittiLoader(split="train", load_images=False)
+        prepare_yolo_dataset(loader, output_dir=shared_data_yaml.parent)
+
+    # Load YAML to discover dataset root path for KittiLoader
+    try:
+        import yaml
+
+        with open(shared_data_yaml, "r", encoding="utf-8") as fh:
+            y = yaml.safe_load(fh)
+        ds_root = Path(y.get("path", str(shared_data_yaml.parent)))
+    except Exception:
+        # Fallback to parent folder if YAML parsing fails
+        ds_root = shared_data_yaml.parent
+
+    # Validate dataset contents before training
+    try:
+        from dataset_loader.kitti_loader import IMAGE_EXTENSIONS
+    except Exception:
+        IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp"}
+
+    train_rel = y.get("train")
+    val_rel = y.get("val")
+
+    if not train_rel or not val_rel:
+        raise RuntimeError(f"data.yaml must specify 'train' and 'val' entries: {shared_data_yaml}")
+
+    train_images_dir = ds_root / Path(train_rel)
+    val_images_dir = ds_root / Path(val_rel)
+
+    train_label_dir = ds_root / "labels" / Path(train_rel).name
+    val_label_dir = ds_root / "labels" / Path(val_rel).name
+
+    def _count_images(p: Path) -> int:
+        if not p.exists():
+            return 0
+        return sum(1 for f in p.iterdir() if f.is_file() and f.suffix.lower() in IMAGE_EXTENSIONS)
+
+    def _count_labels(p: Path) -> int:
+        if not p.exists():
+            return 0
+        return sum(1 for f in p.iterdir() if f.is_file() and f.suffix.lower() == ".txt")
+
+    n_train_imgs = _count_images(train_images_dir)
+    n_val_imgs = _count_images(val_images_dir)
+    n_train_lbls = _count_labels(train_label_dir)
+    n_val_lbls = _count_labels(val_label_dir)
+
+    # Log dataset statistics
+    logger.info("Validated YOLO dataset: %s", shared_data_yaml)
+    logger.info("  Train Images : %d", n_train_imgs)
+    logger.info("  Val Images   : %d", n_val_imgs)
+    logger.info("  Train Labels : %d", n_train_lbls)
+    logger.info("  Val Labels   : %d", n_val_lbls)
+
+    missing = []
+    if not shared_data_yaml.exists():
+        missing.append(f"data.yaml missing: {shared_data_yaml}")
+    if n_train_imgs == 0:
+        missing.append(f"train images empty: {train_images_dir}")
+    if n_val_imgs == 0:
+        missing.append(f"val images empty: {val_images_dir}")
+    if n_train_lbls == 0:
+        missing.append(f"train labels empty: {train_label_dir}")
+    if n_val_lbls == 0:
+        missing.append(f"val labels empty: {val_label_dir}")
+
+    if missing:
+        msg = "YOLO dataset validation failed:\n" + "\n".join(missing)
+        logger.error(msg)
+        raise RuntimeError(msg)
+
+    # Configure training to write artifacts into the experiment directory only
     cfg = YoloConfig.from_dict({
         "model_name": "yolov8n.pt",
         "epochs": args.epochs,
@@ -66,28 +147,29 @@ def run_baseline(exp_dir: Path, args: argparse.Namespace) -> Dict[str, Any]:
     })
 
     trainer = YoloTrainer(config=cfg)
-    trainer.train(dataset=None, data_yaml_path=data_yaml)
+    # NOTE: pass the shared data.yaml path so Ultralytics reads images/labels in-place
+    trainer.train(dataset=None, data_yaml_path=shared_data_yaml)
 
-    # Evaluate on validation split
-    val_loader = KittiLoader(kitti_dir=str(exp_dir / "dataset"), split="val", load_images=False)
+    # Evaluate on the validation split located under the shared dataset root
+    val_loader = KittiLoader(kitti_dir=str(ds_root), split="val", load_images=False)
     evaluator = YoloEvaluator()
-    wrapper = trainer.wrapper
-    predictor = wrapper and None
-    # Use predictor wrapper to evaluate
     from models.predictor import YoloPredictor
 
-    predictor = YoloPredictor(wrapper=wrapper)
+    predictor = YoloPredictor(wrapper=trainer.wrapper)
     report = evaluator.evaluate_dataset(dataset=val_loader, predictor=predictor, dataset_name="baseline_val")
 
-    # Persist artifacts
+    # Persist lightweight experiment artifacts only
     _save_json(exp_dir / "config.json", cfg.to_dict())
     report.save_json(exp_dir / "metrics.json")
-    # Copy weights if available
+
+    # Copy only checkpoints into exp_dir/checkpoints for convenience (do not duplicate dataset)
     try:
+        checkpoints_dir = exp_dir / "checkpoints"
+        checkpoints_dir.mkdir(parents=True, exist_ok=True)
         if trainer.best_weights_path.exists():
-            shutil.copy2(trainer.best_weights_path, exp_dir / "best.pt")
+            shutil.copy2(trainer.best_weights_path, checkpoints_dir / "best.pt")
         if trainer.last_weights_path.exists():
-            shutil.copy2(trainer.last_weights_path, exp_dir / "last.pt")
+            shutil.copy2(trainer.last_weights_path, checkpoints_dir / "last.pt")
     except Exception:
         logger.debug("No weights to copy for baseline")
 
