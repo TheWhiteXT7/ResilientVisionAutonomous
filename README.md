@@ -158,10 +158,11 @@ release intended for reuse.
 
 ## References and acknowledgements
 
-- A. Jain, L. E. et al., *They See Me Rollin': Inherent Vulnerability of the
-  Rolling Shutter in CMOS Image Sensors*, USENIX Security Symposium, 2021.
-  The attack operation was derived from this research:
-  <https://www.usenix.org/conference/usenixsecurity21/presentation/jain>.
+- S. Köhler, G. Lovisotto, S. Birnbach, R. Baker, and I. Martinovic,
+  "They See Me Rollin': Inherent Vulnerability of the Rolling Shutter in
+  CMOS Image Sensors," Annual Computer Security Applications Conference
+  (ACSAC '21), 2021, ACM.
+  DOI: https://doi.org/10.1145/3485832.3488016
 - KITTI and BDD100K remain the property of their respective creators and are
   not distributed by this repository. Users must comply with their applicable
   licenses, terms, and citation requirements before downloading or using them.
