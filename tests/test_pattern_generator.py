@@ -5,6 +5,7 @@ import unittest
 from attack_engine.attack_config import AttackConfig
 from attack_engine.laser_pattern import LaserPattern, LaserSpot
 from attack_engine.pattern_generator import PatternGenerator
+from attack_engine.target_selection import TargetRegion
 
 
 class TestPatternGenerator(unittest.TestCase):
@@ -108,6 +109,138 @@ class TestPatternGenerator(unittest.TestCase):
         for attr in dir(pg_mod):
             self.assertNotIn("PIL", attr)
             self.assertNotIn("Image", attr)
+
+
+class TestTargetedSpots(unittest.TestCase):
+    """Test suite for object-aware targeted spot generation."""
+
+    def setUp(self) -> None:
+        self.width = 640
+        self.height = 480
+        self.target = TargetRegion(class_name="Car", bbox=(100.0, 100.0, 300.0, 300.0))
+
+    def test_targeted_pattern_type_recognized(self) -> None:
+        """Verify generate() dispatches 'targeted' and 'targeted_spots'."""
+        config = AttackConfig(max_spots=4, random_seed=42)
+        generator = PatternGenerator(self.width, self.height, config)
+
+        for ptype in ("targeted", "targeted_spots"):
+            with self.subTest(pattern_type=ptype):
+                pattern = generator.generate(ptype, target=self.target)
+                self.assertEqual(len(pattern), 4)
+
+    def test_targeted_requires_target_argument(self) -> None:
+        """Verify generating a targeted pattern without a target fails clearly."""
+        generator = PatternGenerator(self.width, self.height, AttackConfig())
+        with self.assertRaises(ValueError):
+            generator.generate("targeted")
+
+    def test_targeted_requires_target_region_type(self) -> None:
+        """Verify passing a non-TargetRegion target raises TypeError."""
+        generator = PatternGenerator(self.width, self.height, AttackConfig())
+        with self.assertRaises(TypeError):
+            generator.targeted_spots("not_a_region")  # type: ignore[arg-type]
+
+    def test_all_centers_inside_target_bbox(self) -> None:
+        """Verify every spot center lies inside the selected target bounding box."""
+        config = AttackConfig(spot_radius=10.0, max_spots=20, random_seed=42)
+        generator = PatternGenerator(self.width, self.height, config)
+        pattern = generator.targeted_spots(self.target)
+
+        self.assertEqual(len(pattern), 20)
+        for spot in pattern:
+            self.assertGreaterEqual(spot.x, 100.0)
+            self.assertLessEqual(spot.x, 300.0)
+            self.assertGreaterEqual(spot.y, 100.0)
+            self.assertLessEqual(spot.y, 300.0)
+
+    def test_centers_clamped_by_spot_radius(self) -> None:
+        """Verify centers keep the full disc inside the bbox when possible."""
+        config = AttackConfig(spot_radius=10.0, max_spots=20, random_seed=42)
+        generator = PatternGenerator(self.width, self.height, config)
+        pattern = generator.targeted_spots(self.target)
+
+        for spot in pattern:
+            self.assertGreaterEqual(spot.x, 110.0)
+            self.assertLessEqual(spot.x, 290.0)
+            self.assertGreaterEqual(spot.y, 110.0)
+            self.assertLessEqual(spot.y, 290.0)
+
+    def test_small_bbox_falls_back_to_full_bbox(self) -> None:
+        """Verify a bbox smaller than the spot diameter still yields valid centers."""
+        target = TargetRegion(class_name="Car", bbox=(100.0, 100.0, 110.0, 110.0))
+        config = AttackConfig(spot_radius=15.0, max_spots=5, random_seed=3)
+        generator = PatternGenerator(self.width, self.height, config)
+        pattern = generator.targeted_spots(target)
+
+        self.assertEqual(len(pattern), 5)
+        for spot in pattern:
+            self.assertGreaterEqual(spot.x, 100.0)
+            self.assertLessEqual(spot.x, 110.0)
+            self.assertGreaterEqual(spot.y, 100.0)
+            self.assertLessEqual(spot.y, 110.0)
+
+    def test_spots_respect_image_boundaries(self) -> None:
+        """Verify targeted spots stay within the image even near the border."""
+        target = TargetRegion(class_name="Car", bbox=(600.0, 100.0, 640.0, 300.0))
+        config = AttackConfig(spot_radius=10.0, max_spots=10, random_seed=1)
+        generator = PatternGenerator(self.width, self.height, config)
+        pattern = generator.targeted_spots(target)
+
+        for spot in pattern:
+            self.assertGreaterEqual(spot.x, 0.0)
+            self.assertLessEqual(spot.x, 640.0)
+            self.assertGreaterEqual(spot.y, 0.0)
+            self.assertLessEqual(spot.y, 480.0)
+            self.assertGreaterEqual(spot.x, 600.0)
+            self.assertLessEqual(spot.x, 640.0)
+            self.assertGreaterEqual(spot.y, 100.0)
+            self.assertLessEqual(spot.y, 300.0)
+
+    def test_targeted_reproducible_with_seed(self) -> None:
+        """Verify targeted spots are reproducible with the same seed."""
+        config = AttackConfig(spot_radius=10.0, max_spots=4, random_seed=7)
+        g1 = PatternGenerator(self.width, self.height, config)
+        g2 = PatternGenerator(self.width, self.height, config)
+
+        p1 = g1.targeted_spots(self.target)
+        p2 = g2.targeted_spots(self.target)
+
+        self.assertEqual(len(p1), len(p2))
+        for s1, s2 in zip(p1, p2):
+            self.assertEqual(s1.x, s2.x)
+            self.assertEqual(s1.y, s2.y)
+
+    def test_preserves_visual_settings(self) -> None:
+        """Verify laser_color/intensity/radius are preserved on targeted spots."""
+        config = AttackConfig(
+            laser_color=(0, 0, 255),
+            intensity=0.6,
+            spot_radius=12.0,
+            max_spots=2,
+            random_seed=5,
+        )
+        generator = PatternGenerator(self.width, self.height, config)
+        pattern = generator.targeted_spots(self.target)
+
+        self.assertEqual(len(pattern), 2)
+        for spot in pattern:
+            self.assertEqual(spot.color, (0, 0, 255))
+            self.assertEqual(spot.intensity, 0.6)
+            self.assertEqual(spot.radius, 12.0)
+
+    def test_bbox_outside_image_rejected(self) -> None:
+        """Verify a target bbox fully outside the canvas raises ValueError."""
+        target = TargetRegion(class_name="Car", bbox=(700.0, 500.0, 800.0, 600.0))
+        generator = PatternGenerator(self.width, self.height, AttackConfig())
+        with self.assertRaises(ValueError):
+            generator.targeted_spots(target)
+
+    def test_num_spots_validation(self) -> None:
+        """Verify non-positive num_spots override raises ValueError."""
+        generator = PatternGenerator(self.width, self.height, AttackConfig())
+        with self.assertRaises(ValueError):
+            generator.targeted_spots(self.target, num_spots=0)
 
 
 if __name__ == "__main__":

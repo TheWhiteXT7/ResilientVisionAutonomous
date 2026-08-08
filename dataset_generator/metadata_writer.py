@@ -54,6 +54,7 @@ class MetadataWriter:
             "max_spots": int(config.max_spots),
             "random_seed": config.random_seed,
             "pattern_type": str(config.pattern_type),
+            "target_class": str(config.target_class),
             "output_dtype": str(config.output_dtype),
         }
 

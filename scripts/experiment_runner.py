@@ -244,7 +244,7 @@ def main(argv: Any = None) -> int:
             elif stage == "random_attack":
                 metrics = run_attack_stage(stage, exp_dir, args, pattern_type="random")
             elif stage == "target_attack":
-                metrics = run_attack_stage(stage, exp_dir, args, pattern_type="single")
+                metrics = run_attack_stage(stage, exp_dir, args, pattern_type="targeted")
             elif stage == "defense":
                 metrics = run_attack_stage(stage, exp_dir, args, pattern_type="random")
             else:

@@ -18,6 +18,7 @@ class AttackConfig:
         random_seed: Optional seed for reproducible random spot placement.
         pattern_type: Pattern generation algorithm identifier.
         output_dtype: Data type string for output representation.
+        target_class: Object class targeted by 'targeted' attacks (e.g., 'Car').
     """
 
     laser_color: Tuple[int, int, int] = (255, 0, 0)
@@ -29,6 +30,7 @@ class AttackConfig:
     random_seed: Optional[int] = None
     pattern_type: str = "random"
     output_dtype: str = "uint8"
+    target_class: str = "Car"
 
     def __post_init__(self) -> None:
         """Validate all parameters upon dataclass initialization.
@@ -99,3 +101,9 @@ class AttackConfig:
             raise TypeError("output_dtype must be a string.")
         if not self.output_dtype.strip():
             raise ValueError("output_dtype cannot be empty.")
+
+        # Validate target_class
+        if isinstance(self.target_class, bool) or not isinstance(self.target_class, str):
+            raise TypeError("target_class must be a string.")
+        if not self.target_class.strip():
+            raise ValueError("target_class cannot be empty.")

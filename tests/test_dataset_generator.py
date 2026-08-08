@@ -153,6 +153,66 @@ class TestDatasetGenerator(unittest.TestCase):
         self.assertEqual(len(report["failures"]), 1)
         self.assertEqual(report["failures"][0]["sample_id"], "000001")
 
+    def test_targeted_passes_annotations_to_pipeline(self) -> None:
+        """Test DatasetGenerator threads KittiSample annotations for targeted attacks."""
+        captured = {}
+        original = self.pipeline.execute
+
+        def spy(image, pattern_type="random", **kwargs):
+            captured["pattern_type"] = pattern_type
+            captured["kwargs"] = kwargs
+            return original(image=image, pattern_type=pattern_type, **kwargs)
+
+        self.pipeline.execute = spy  # type: ignore[method-assign]
+        report = self.generator.generate_single("000000", pattern_type="targeted")
+
+        self.assertEqual(report["successful_samples"], 1)
+        self.assertEqual(captured["pattern_type"], "targeted")
+        self.assertIn("annotations", captured["kwargs"])
+        self.assertTrue(captured["kwargs"]["annotations"])
+        self.assertEqual(captured["kwargs"]["target_class"], "Car")
+
+    def test_targeted_produces_modified_output(self) -> None:
+        """Test a targeted dataset run writes an attacked image and metadata."""
+        report = self.generator.generate_single("000000", pattern_type="targeted")
+
+        self.assertEqual(report["successful_samples"], 1)
+        out_img = self.output_dir / "training" / "image_2" / "000000.png"
+        self.assertTrue(out_img.exists())
+        out_meta = self.output_dir / "training" / "metadata" / "000000.json"
+        self.assertTrue(out_meta.exists())
+
+    def test_random_receives_no_annotations(self) -> None:
+        """Test random generation passes no target information into the pipeline."""
+        captured = {}
+        original = self.pipeline.execute
+
+        def spy(image, pattern_type="random", **kwargs):
+            captured["pattern_type"] = pattern_type
+            captured["kwargs"] = kwargs
+            return original(image=image, pattern_type=pattern_type, **kwargs)
+
+        self.pipeline.execute = spy  # type: ignore[method-assign]
+        self.generator.generate_single("000000", pattern_type="random")
+
+        self.assertEqual(captured["pattern_type"], "random")
+        self.assertNotIn("annotations", captured["kwargs"])
+
+    def test_target_class_forwarded_through_generation(self) -> None:
+        """Test target_class override flows from generation API into the pipeline."""
+        captured = {}
+        original = self.pipeline.execute
+
+        def spy(image, pattern_type="random", **kwargs):
+            captured["pattern_type"] = pattern_type
+            captured["kwargs"] = kwargs
+            return original(image=image, pattern_type=pattern_type, **kwargs)
+
+        self.pipeline.execute = spy  # type: ignore[method-assign]
+        self.generator.generate_single("000000", pattern_type="targeted", target_class="Car")
+
+        self.assertEqual(captured["kwargs"]["target_class"], "Car")
+
 
 if __name__ == "__main__":
     unittest.main()
