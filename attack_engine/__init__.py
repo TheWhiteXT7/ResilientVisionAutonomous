@@ -5,6 +5,7 @@ from .attack_pipeline import AttackPipeline, apply_attack
 from .laser_pattern import LaserPattern, LaserSpot
 from .pattern_generator import PatternGenerator
 from .projection_engine import ProjectionEngine
+from .target_selection import TargetRegion, TargetSelectionError, select_target
 from .utils import apply_pattern, numpy_to_pil, pil_to_numpy
 
 __all__ = [
@@ -13,6 +14,9 @@ __all__ = [
     "LaserPattern",
     "PatternGenerator",
     "ProjectionEngine",
+    "TargetRegion",
+    "TargetSelectionError",
+    "select_target",
     "AttackPipeline",
     "apply_attack",
     "apply_pattern",

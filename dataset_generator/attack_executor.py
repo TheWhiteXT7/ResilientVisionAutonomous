@@ -10,6 +10,8 @@ from attack_engine.attack_pipeline import AttackPipeline
 from attack_engine.laser_pattern import LaserPattern
 from dataset_loader.kitti_loader import KittiSample
 
+TARGETED_PATTERN_TYPES = ("targeted", "targeted_spots")
+
 
 class AttackExecutor:
     """Executes laser pattern attacks on KittiSample instances in memory without writing files."""
@@ -44,6 +46,7 @@ class AttackExecutor:
         self,
         sample: KittiSample,
         pattern_type: str = "random",
+        target_class: str = "Car",
         **kwargs: Any,
     ) -> Tuple[Image.Image, LaserPattern, Dict[str, Any]]:
         """Apply laser pattern attack to a KittiSample in memory.
@@ -51,6 +54,7 @@ class AttackExecutor:
         Args:
             sample: KittiSample object containing image/path data.
             pattern_type: Identifier for pattern generation algorithm.
+            target_class: Target class used by 'targeted' attacks (default 'Car').
             **kwargs: Additional parameter overrides for AttackConfig.
 
         Returns:
@@ -58,6 +62,7 @@ class AttackExecutor:
 
         Raises:
             TypeError: If sample is not an instance of KittiSample.
+            ValueError: If a targeted attack has no valid target annotation.
         """
         if not isinstance(sample, KittiSample):
             raise TypeError(f"sample must be a KittiSample instance, got {type(sample).__name__}.")
@@ -67,15 +72,30 @@ class AttackExecutor:
         # Load PIL Image from KittiSample
         image = sample.image if sample.image is not None else sample.load_image()
 
+        # Thread parsed KittiSample annotations into targeted attacks only, so
+        # random attacks receive no target information and behave as before.
+        pipeline_kwargs = dict(kwargs)
+        if str(pattern_type).strip().lower() in TARGETED_PATTERN_TYPES:
+            pipeline_kwargs["annotations"] = list(sample.annotations)
+            pipeline_kwargs["target_class"] = target_class
+
         # Delegate attack execution to AttackPipeline
         attacked_image, laser_pattern = self.pipeline.execute(
             image=image,
             pattern_type=pattern_type,
-            **kwargs,
+            **pipeline_kwargs,
         )
 
         end_time = time.perf_counter()
         elapsed_ms = (end_time - start_time) * 1000.0
+
+        target_info: Optional[Dict[str, Any]] = None
+        last_target = getattr(self.pipeline, "last_target", None)
+        if last_target is not None:
+            target_info = {
+                "class_name": last_target.class_name,
+                "bbox": list(last_target.bbox),
+            }
 
         execution_metadata = {
             "sample_id": sample.sample_id,
@@ -84,6 +104,7 @@ class AttackExecutor:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "processing_time_ms": round(elapsed_ms, 3),
             "image_size": image.size,
+            "target": target_info,
         }
 
         return attacked_image, laser_pattern, execution_metadata

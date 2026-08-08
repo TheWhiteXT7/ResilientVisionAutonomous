@@ -8,6 +8,7 @@ from PIL import Image
 from attack_engine import AttackConfig, AttackPipeline, LaserPattern
 from dataset_generator.attack_executor import AttackExecutor
 from dataset_loader import KittiSample
+from dataset_loader.annotation_parser import Annotation
 
 
 class TestAttackExecutor(unittest.TestCase):
@@ -76,6 +77,91 @@ class TestAttackExecutor(unittest.TestCase):
         """Test passing invalid sample object raises TypeError."""
         with self.assertRaises(TypeError):
             self.executor.execute("not_a_sample")  # type: ignore[arg-type]
+
+    def _make_car_annotation(self) -> Annotation:
+        return Annotation(
+            class_name="Car",
+            truncated=0.0,
+            occluded=0,
+            alpha=0.0,
+            bbox=(20.0, 20.0, 80.0, 80.0),
+            dimensions=(1.5, 1.6, 3.5),
+            location=(0.0, 0.0, 10.0),
+            rotation_y=0.0,
+        )
+
+    def test_execute_targeted_passes_annotations(self) -> None:
+        """Test executor threads KittiSample annotations into the pipeline."""
+        captured = {}
+        original = self.pipeline.execute
+
+        def spy(image, pattern_type="random", **kwargs):
+            captured["pattern_type"] = pattern_type
+            captured["kwargs"] = kwargs
+            return original(image=image, pattern_type=pattern_type, **kwargs)
+
+        self.pipeline.execute = spy  # type: ignore[method-assign]
+        self.sample.annotations = [self._make_car_annotation()]
+        attacked_image, pattern, metadata = self.executor.execute(
+            self.sample, pattern_type="targeted"
+        )
+
+        self.assertEqual(captured["pattern_type"], "targeted")
+        self.assertIn("annotations", captured["kwargs"])
+        self.assertEqual(captured["kwargs"]["annotations"], self.sample.annotations)
+        self.assertEqual(captured["kwargs"]["target_class"], "Car")
+
+        self.assertIsInstance(attacked_image, Image.Image)
+        self.assertEqual(len(pattern), 3)
+        for spot in pattern:
+            self.assertGreaterEqual(spot.x, 20.0)
+            self.assertLessEqual(spot.x, 80.0)
+            self.assertGreaterEqual(spot.y, 20.0)
+            self.assertLessEqual(spot.y, 80.0)
+
+    def test_execute_targeted_metadata_includes_target(self) -> None:
+        """Test targeted execution records the selected target in metadata."""
+        self.sample.annotations = [self._make_car_annotation()]
+        _, _, metadata = self.executor.execute(self.sample, pattern_type="targeted")
+
+        self.assertEqual(metadata["pattern_type"], "targeted")
+        self.assertEqual(metadata["target"]["class_name"], "Car")
+        self.assertEqual(metadata["target"]["bbox"], [20.0, 20.0, 80.0, 80.0])
+
+    def test_execute_random_receives_no_annotations(self) -> None:
+        """Test random execution receives no target information."""
+        captured = {}
+        original = self.pipeline.execute
+
+        def spy(image, pattern_type="random", **kwargs):
+            captured["pattern_type"] = pattern_type
+            captured["kwargs"] = kwargs
+            return original(image=image, pattern_type=pattern_type, **kwargs)
+
+        self.pipeline.execute = spy  # type: ignore[method-assign]
+        self.sample.annotations = [self._make_car_annotation()]
+        self.executor.execute(self.sample, pattern_type="random")
+
+        self.assertEqual(captured["pattern_type"], "random")
+        self.assertNotIn("annotations", captured["kwargs"])
+        self.assertNotIn("target_class", captured["kwargs"])
+
+    def test_execute_targeted_no_matching_target_fails(self) -> None:
+        """Test a sample without a matching target class fails clearly."""
+        self.sample.annotations = [
+            Annotation(
+                class_name="Pedestrian",
+                truncated=0.0,
+                occluded=0,
+                alpha=0.0,
+                bbox=(20.0, 20.0, 80.0, 80.0),
+                dimensions=(1.7, 0.6, 0.8),
+                location=(0.0, 0.0, 5.0),
+                rotation_y=0.0,
+            )
+        ]
+        with self.assertRaises(ValueError):
+            self.executor.execute(self.sample, pattern_type="targeted")
 
 
 if __name__ == "__main__":

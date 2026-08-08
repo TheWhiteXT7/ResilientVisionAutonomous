@@ -120,6 +120,19 @@ class TestAttackConfig(unittest.TestCase):
         with self.assertRaises(ValueError):
             AttackConfig(output_dtype="")
 
+    def test_target_class_default(self) -> None:
+        """Test target_class defaults to 'Car'."""
+        config = AttackConfig()
+        self.assertEqual(config.target_class, "Car")
+
+    def test_target_class_validation(self) -> None:
+        """Test target_class type and non-empty validation."""
+        self.assertEqual(AttackConfig(target_class="Pedestrian").target_class, "Pedestrian")
+        with self.assertRaises(TypeError):
+            AttackConfig(target_class=123)  # type: ignore[arg-type]
+        with self.assertRaises(ValueError):
+            AttackConfig(target_class="   ")
+
 
 if __name__ == "__main__":
     unittest.main()
