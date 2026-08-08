@@ -133,6 +133,24 @@ class TestAttackConfig(unittest.TestCase):
         with self.assertRaises(ValueError):
             AttackConfig(target_class="   ")
 
+    def test_missing_target_policy_default(self) -> None:
+        """Test missing_target_policy defaults to 'preserve'."""
+        config = AttackConfig()
+        self.assertEqual(config.missing_target_policy, "preserve")
+
+    def test_missing_target_policy_validation(self) -> None:
+        """Test missing_target_policy accepts only supported values."""
+        self.assertEqual(
+            AttackConfig(missing_target_policy="fail").missing_target_policy, "fail"
+        )
+        self.assertEqual(
+            AttackConfig(missing_target_policy="preserve").missing_target_policy, "preserve"
+        )
+        with self.assertRaises(TypeError):
+            AttackConfig(missing_target_policy=123)  # type: ignore[arg-type]
+        with self.assertRaises(ValueError):
+            AttackConfig(missing_target_policy="bogus")
+
 
 if __name__ == "__main__":
     unittest.main()

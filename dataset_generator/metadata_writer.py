@@ -55,6 +55,7 @@ class MetadataWriter:
             "random_seed": config.random_seed,
             "pattern_type": str(config.pattern_type),
             "target_class": str(config.target_class),
+            "missing_target_policy": str(config.missing_target_policy),
             "output_dtype": str(config.output_dtype),
         }
 
@@ -66,6 +67,10 @@ class MetadataWriter:
             "attack_config": config_data,
             "timestamp": execution_metadata.get("timestamp"),
             "processing_time_ms": execution_metadata.get("processing_time_ms"),
+            "spots_count": execution_metadata.get("spots_count"),
+            "target_found": execution_metadata.get("target_found"),
+            "preserved": execution_metadata.get("preserved"),
+            "target": execution_metadata.get("target"),
         }
 
         with output_file.open("w", encoding="utf-8") as f:

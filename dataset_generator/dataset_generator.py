@@ -127,6 +127,8 @@ class DatasetGenerator:
                 "max_spots": effective_attack_config.max_spots,
                 "random_seed": effective_attack_config.random_seed,
                 "pattern_type": ptype,
+                "target_class": effective_attack_config.target_class,
+                "missing_target_policy": effective_attack_config.missing_target_policy,
                 "output_dtype": effective_attack_config.output_dtype,
             }
             cfg_dict.update(kwargs)

@@ -19,6 +19,9 @@ class AttackConfig:
         pattern_type: Pattern generation algorithm identifier.
         output_dtype: Data type string for output representation.
         target_class: Object class targeted by 'targeted' attacks (e.g., 'Car').
+        missing_target_policy: Behavior when a 'targeted' attack finds no valid
+            target: 'preserve' keeps the original image unchanged and continues
+            processing, 'fail' raises TargetSelectionError.
     """
 
     laser_color: Tuple[int, int, int] = (255, 0, 0)
@@ -31,6 +34,7 @@ class AttackConfig:
     pattern_type: str = "random"
     output_dtype: str = "uint8"
     target_class: str = "Car"
+    missing_target_policy: str = "preserve"
 
     def __post_init__(self) -> None:
         """Validate all parameters upon dataclass initialization.
@@ -107,3 +111,14 @@ class AttackConfig:
             raise TypeError("target_class must be a string.")
         if not self.target_class.strip():
             raise ValueError("target_class cannot be empty.")
+
+        # Validate missing_target_policy
+        if isinstance(self.missing_target_policy, bool) or not isinstance(self.missing_target_policy, str):
+            raise TypeError("missing_target_policy must be a string.")
+        policy = self.missing_target_policy.strip().lower()
+        if policy not in ("preserve", "fail"):
+            raise ValueError(
+                f"missing_target_policy must be one of ('preserve', 'fail'), "
+                f"got '{self.missing_target_policy}'."
+            )
+        object.__setattr__(self, "missing_target_policy", policy)

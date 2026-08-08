@@ -213,6 +213,114 @@ class TestDatasetGenerator(unittest.TestCase):
 
         self.assertEqual(captured["kwargs"]["target_class"], "Car")
 
+    def _make_pedestrian_only(self, sample_id: str) -> None:
+        """Overwrite a sample's label file with a valid Pedestrian-only label."""
+        lbl_path = self.lbl_dir / f"{sample_id}.txt"
+        lbl_path.write_text(
+            "Pedestrian 0.0 0 0.0 50.0 50.0 100.0 100.0 1.5 0.6 0.8 0.0 1.0 5.0 0.0",
+            encoding="utf-8",
+        )
+
+    def test_targeted_missing_car_preserves_complete_dataset(self) -> None:
+        """Test targeted generation preserves all samples when some lack a Car."""
+        self._make_pedestrian_only("000001")
+
+        report = self.generator.generate_dataset(pattern_type="targeted")
+
+        self.assertEqual(report["total_samples"], 3)
+        self.assertEqual(report["processed_samples"], 3)
+        self.assertEqual(report["successful_samples"], 3)
+        self.assertEqual(report["failed_samples"], 0)
+
+        # All images, labels, and calib files are present in the output.
+        out_img_dir = self.output_dir / "training" / "image_2"
+        out_lbl_dir = self.output_dir / "training" / "label_2"
+        out_cal_dir = self.output_dir / "training" / "calib"
+        for sid in ("000000", "000001", "000002"):
+            self.assertTrue((out_img_dir / f"{sid}.png").exists())
+            self.assertTrue((out_lbl_dir / f"{sid}.txt").exists())
+            self.assertTrue((out_cal_dir / f"{sid}.txt").exists())
+
+        # Split membership is preserved exactly.
+        self.assertEqual(
+            (self.output_dir / "ImageSets" / "train.txt").read_text(encoding="utf-8"),
+            (self.splits_dir / "train.txt").read_text(encoding="utf-8"),
+        )
+        self.assertEqual(
+            (self.output_dir / "ImageSets" / "val.txt").read_text(encoding="utf-8"),
+            (self.splits_dir / "val.txt").read_text(encoding="utf-8"),
+        )
+
+    def test_targeted_missing_car_preserves_label_calib_and_metadata(self) -> None:
+        """Test a no-Car sample keeps label/calib and records target_found=false."""
+        self._make_pedestrian_only("000001")
+
+        report = self.generator.generate_single("000001", pattern_type="targeted")
+
+        self.assertEqual(report["successful_samples"], 1)
+
+        out_img = self.output_dir / "training" / "image_2" / "000001.png"
+        out_lbl = self.output_dir / "training" / "label_2" / "000001.txt"
+        out_cal = self.output_dir / "training" / "calib" / "000001.txt"
+        self.assertTrue(out_img.exists())
+        self.assertTrue(out_lbl.exists())
+        self.assertTrue(out_cal.exists())
+        self.assertEqual(
+            out_lbl.read_text(encoding="utf-8"),
+            (self.lbl_dir / "000001.txt").read_text(encoding="utf-8"),
+        )
+
+        import json
+        with (self.output_dir / "training" / "metadata" / "000001.json").open(
+            encoding="utf-8"
+        ) as f:
+            data = json.load(f)
+        self.assertEqual(data["pattern_type"], "targeted")
+        self.assertIs(data["target_found"], False)
+        self.assertIs(data["preserved"], True)
+        self.assertIsNone(data["target"])
+        self.assertEqual(data["spots_count"], 0)
+        self.assertEqual(len(data["spots"]), 0)
+        self.assertEqual(data["attack_config"]["target_class"], "Car")
+        self.assertEqual(data["attack_config"]["missing_target_policy"], "preserve")
+
+    def test_targeted_with_car_metadata_target_found_true(self) -> None:
+        """Test a Car sample is attacked and records target_found=true."""
+        self.generator.generate_single("000000", pattern_type="targeted")
+
+        import json
+        with (self.output_dir / "training" / "metadata" / "000000.json").open(
+            encoding="utf-8"
+        ) as f:
+            data = json.load(f)
+        self.assertEqual(data["pattern_type"], "targeted")
+        self.assertIs(data["target_found"], True)
+        self.assertIs(data["preserved"], False)
+        self.assertEqual(data["target"]["class_name"], "Car")
+        self.assertEqual(data["spots_count"], 2)
+        self.assertGreater(len(data["spots"]), 0)
+
+    def test_targeted_train_val_counts_match_source(self) -> None:
+        """Test generated target dataset preserves train/val image counts."""
+        self._make_pedestrian_only("000001")
+        self.generator.generate_dataset(pattern_type="targeted")
+
+        out_img_dir = self.output_dir / "training" / "image_2"
+        generated_ids = sorted(p.stem for p in out_img_dir.glob("*.png"))
+        self.assertEqual(generated_ids, ["000000", "000001", "000002"])
+
+        train_ids = (
+            (self.output_dir / "ImageSets" / "train.txt").read_text(encoding="utf-8").split()
+        )
+        val_ids = (
+            (self.output_dir / "ImageSets" / "val.txt").read_text(encoding="utf-8").split()
+        )
+        self.assertEqual(len(train_ids), 3)
+        self.assertEqual(len(val_ids), 1)
+        # Every split member has a generated image.
+        for sid in train_ids + val_ids:
+            self.assertTrue((out_img_dir / f"{sid}.png").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

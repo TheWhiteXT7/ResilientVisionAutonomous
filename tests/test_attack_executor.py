@@ -6,6 +6,7 @@ from pathlib import Path
 from PIL import Image
 
 from attack_engine import AttackConfig, AttackPipeline, LaserPattern
+from attack_engine.target_selection import TargetSelectionError
 from dataset_generator.attack_executor import AttackExecutor
 from dataset_loader import KittiSample
 from dataset_loader.annotation_parser import Annotation
@@ -127,6 +128,8 @@ class TestAttackExecutor(unittest.TestCase):
         self.assertEqual(metadata["pattern_type"], "targeted")
         self.assertEqual(metadata["target"]["class_name"], "Car")
         self.assertEqual(metadata["target"]["bbox"], [20.0, 20.0, 80.0, 80.0])
+        self.assertIs(metadata["target_found"], True)
+        self.assertIs(metadata["preserved"], False)
 
     def test_execute_random_receives_no_annotations(self) -> None:
         """Test random execution receives no target information."""
@@ -146,8 +149,17 @@ class TestAttackExecutor(unittest.TestCase):
         self.assertNotIn("annotations", captured["kwargs"])
         self.assertNotIn("target_class", captured["kwargs"])
 
-    def test_execute_targeted_no_matching_target_fails(self) -> None:
-        """Test a sample without a matching target class fails clearly."""
+    def test_execute_random_metadata_has_no_target(self) -> None:
+        """Test random execution metadata carries no target information."""
+        self.sample.annotations = [self._make_car_annotation()]
+        _, _, metadata = self.executor.execute(self.sample, pattern_type="random")
+
+        self.assertIsNone(metadata["target"])
+        self.assertIsNone(metadata["target_found"])
+        self.assertIs(metadata["preserved"], False)
+
+    def test_execute_targeted_no_target_preserves_original(self) -> None:
+        """Test default 'preserve' policy keeps the original image unchanged."""
         self.sample.annotations = [
             Annotation(
                 class_name="Pedestrian",
@@ -160,8 +172,71 @@ class TestAttackExecutor(unittest.TestCase):
                 rotation_y=0.0,
             )
         ]
-        with self.assertRaises(ValueError):
+        original_image = self.sample.load_image()
+
+        attacked_image, pattern, metadata = self.executor.execute(
+            self.sample, pattern_type="targeted"
+        )
+
+        self.assertEqual(attacked_image.size, original_image.size)
+        self.assertEqual(attacked_image.tobytes(), original_image.tobytes())
+        self.assertEqual(len(pattern), 0)
+        self.assertEqual(metadata["pattern_type"], "targeted")
+        self.assertIs(metadata["target_found"], False)
+        self.assertIs(metadata["preserved"], True)
+        self.assertIsNone(metadata["target"])
+        self.assertEqual(metadata["spots_count"], 0)
+
+    def test_execute_targeted_no_target_fail_policy_raises(self) -> None:
+        """Test 'fail' policy re-raises TargetSelectionError when no target exists."""
+        self.sample.annotations = [
+            Annotation(
+                class_name="Pedestrian",
+                truncated=0.0,
+                occluded=0,
+                alpha=0.0,
+                bbox=(20.0, 20.0, 80.0, 80.0),
+                dimensions=(1.7, 0.6, 0.8),
+                location=(0.0, 0.0, 5.0),
+                rotation_y=0.0,
+            )
+        ]
+        with self.assertRaises(TargetSelectionError):
+            self.executor.execute(
+                self.sample, pattern_type="targeted", missing_target_policy="fail"
+            )
+
+    def test_execute_targeted_policy_from_pipeline_config(self) -> None:
+        """Test pipeline config missing_target_policy='fail' is honored."""
+        self.pipeline.config = AttackConfig(
+            laser_color=(255, 0, 0),
+            spot_radius=10.0,
+            intensity=1.0,
+            max_spots=3,
+            missing_target_policy="fail",
+        )
+        self.sample.annotations = [
+            Annotation(
+                class_name="Pedestrian",
+                truncated=0.0,
+                occluded=0,
+                alpha=0.0,
+                bbox=(20.0, 20.0, 80.0, 80.0),
+                dimensions=(1.7, 0.6, 0.8),
+                location=(0.0, 0.0, 5.0),
+                rotation_y=0.0,
+            )
+        ]
+        with self.assertRaises(TargetSelectionError):
             self.executor.execute(self.sample, pattern_type="targeted")
+
+    def test_execute_targeted_invalid_policy_raises(self) -> None:
+        """Test an unsupported missing_target_policy raises ValueError."""
+        self.sample.annotations = [self._make_car_annotation()]
+        with self.assertRaises(ValueError):
+            self.executor.execute(
+                self.sample, pattern_type="targeted", missing_target_policy="bogus"
+            )
 
 
 if __name__ == "__main__":

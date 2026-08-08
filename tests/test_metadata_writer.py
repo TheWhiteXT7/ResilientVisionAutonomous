@@ -33,6 +33,7 @@ class TestMetadataWriter(unittest.TestCase):
             "pattern_type": "random",
             "timestamp": "2026-07-31T22:50:00+00:00",
             "processing_time_ms": 15.5,
+            "spots_count": 2,
         }
 
     def tearDown(self) -> None:
@@ -63,6 +64,65 @@ class TestMetadataWriter(unittest.TestCase):
         self.assertEqual(data["attack_config"]["laser_color"], [255, 0, 0])
         self.assertEqual(data["timestamp"], "2026-07-31T22:50:00+00:00")
         self.assertEqual(data["processing_time_ms"], 15.5)
+        self.assertEqual(data["spots_count"], 2)
+        self.assertEqual(data["attack_config"]["missing_target_policy"], "preserve")
+
+    def test_write_sample_metadata_target_fields(self) -> None:
+        """Test target_found/preserved/target fields and config section are serialized."""
+        exec_meta = {
+            **self.execution_metadata,
+            "spots_count": 1,
+            "target_found": True,
+            "preserved": False,
+            "target": {
+                "class_name": "Car",
+                "bbox": [20.0, 20.0, 80.0, 80.0],
+                "metadata": {"track_id": 3},
+            },
+        }
+        out_path = Path(self.temp_dir.name) / "metadata" / "000001.json"
+        self.writer.write_sample_metadata(
+            output_path=out_path,
+            sample_id="000001",
+            pattern=self.pattern,
+            config=self.config,
+            execution_metadata=exec_meta,
+        )
+
+        with out_path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+        self.assertEqual(data["spots_count"], 1)
+        self.assertIs(data["target_found"], True)
+        self.assertIs(data["preserved"], False)
+        self.assertEqual(data["target"]["class_name"], "Car")
+        self.assertEqual(data["target"]["bbox"], [20.0, 20.0, 80.0, 80.0])
+        self.assertEqual(data["attack_config"]["target_class"], "Car")
+
+    def test_write_sample_metadata_preserved_fields(self) -> None:
+        """Test preserved samples serialize null target and zero spots."""
+        exec_meta = {
+            **self.execution_metadata,
+            "spots_count": 0,
+            "target_found": False,
+            "preserved": True,
+            "target": None,
+        }
+        out_path = Path(self.temp_dir.name) / "metadata" / "000002.json"
+        self.writer.write_sample_metadata(
+            output_path=out_path,
+            sample_id="000002",
+            pattern=LaserPattern([]),
+            config=self.config,
+            execution_metadata=exec_meta,
+        )
+
+        with out_path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+        self.assertEqual(data["spots_count"], 0)
+        self.assertEqual(data["spots"], [])
+        self.assertIs(data["target_found"], False)
+        self.assertIs(data["preserved"], True)
+        self.assertIsNone(data["target"])
 
     def test_write_dataset_summary(self) -> None:
         """Test writing overall dataset summary JSON file."""
