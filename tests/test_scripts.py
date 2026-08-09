@@ -4,6 +4,7 @@ from pathlib import Path
 import builtins
 
 import pytest
+from PIL import Image
 
 
 def test_compare_models(tmp_path):
@@ -141,10 +142,14 @@ def test_predict_cli_monkeypatch(monkeypatch, tmp_path):
 
 def test_experiment_runner_monkeypatch(monkeypatch, tmp_path):
     from scripts import experiment_runner
-    from config.paths import OUTPUTS_DIR
 
-    # Ensure a shared YOLO dataset YAML exists under outputs/yolo_dataset/data.yaml
-    shared_dir = OUTPUTS_DIR / "yolo_dataset"
+    # Redirect the shared YOLO dataset location into tmp_path so this test never
+    # writes into the real outputs/yolo_dataset directory.
+    fake_outputs = tmp_path / "outputs"
+    monkeypatch.setattr(experiment_runner, "OUTPUTS_DIR", fake_outputs)
+
+    # Ensure a shared YOLO dataset YAML exists under fake_outputs/yolo_dataset/data.yaml
+    shared_dir = fake_outputs / "yolo_dataset"
     shared_dir.mkdir(parents=True, exist_ok=True)
     data_yaml = shared_dir / "data.yaml"
     data_yaml.write_text("path: {}\ntrain: images/train\nval: images/val\nnames: {}\n".format(str(shared_dir), "{}"))
@@ -154,8 +159,8 @@ def test_experiment_runner_monkeypatch(monkeypatch, tmp_path):
     (shared_dir / "labels" / "train").mkdir(parents=True, exist_ok=True)
     (shared_dir / "labels" / "val").mkdir(parents=True, exist_ok=True)
     # Create dummy files
-    (shared_dir / "images" / "train" / "img1.png").write_text("x")
-    (shared_dir / "images" / "val" / "img2.png").write_text("x")
+    Image.new("RGB", (20, 20)).save(shared_dir / "images" / "train" / "img1.png")
+    Image.new("RGB", (20, 20)).save(shared_dir / "images" / "val" / "img2.png")
     (shared_dir / "labels" / "train" / "img1.txt").write_text("1 0.1 0.1 0.2 0.2\n")
     (shared_dir / "labels" / "val" / "img2.txt").write_text("1 0.1 0.1 0.2 0.2\n")
 
