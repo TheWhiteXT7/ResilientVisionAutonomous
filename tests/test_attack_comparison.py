@@ -29,8 +29,12 @@ EXPECTED_METRIC_KEYS = {
 }
 
 
-def make_yolo_dataset(root: Path, prefix: str, n: int) -> Path:
+def make_yolo_dataset(root: Path, prefix: str, n: int, include_names: bool = True) -> Path:
     """Create a minimal YOLO dataset with ``n`` validation samples.
+
+    Args:
+        include_names: If False, write an empty ``names: {}`` block to mimic a
+            clean data.yaml whose class mapping was not persisted.
 
     Returns:
         Path to the generated ``data.yaml``.
@@ -47,10 +51,14 @@ def make_yolo_dataset(root: Path, prefix: str, n: int) -> Path:
         Image.new("RGB", (64, 64), (128, 128, 128)).save(img_val / f"{sample_id}.png")
         (lbl_val / f"{sample_id}.txt").write_text("0 0.5 0.5 0.2 0.2\n")
 
+    names_block = (
+        "names:\n  0: Car\n  1: Pedestrian\n  2: Cyclist\n"
+        if include_names
+        else "names: {}\n"
+    )
     data_yaml = root / "data.yaml"
     data_yaml.write_text(
-        f"path: {root}\ntrain: images/train\nval: images/val\n"
-        f"names:\n  0: Car\n  1: Pedestrian\n  2: Cyclist\n"
+        f"path: {root}\ntrain: images/train\nval: images/val\n" + names_block
     )
     return data_yaml
 
@@ -358,3 +366,76 @@ def test_evaluation_does_not_modify_or_regenerate_dataset_files(
     assert set(before) == set(after)
     for path in before:
         assert before[path] == after[path]
+
+
+def test_clean_empty_names_yaml_still_matches_detector_classes(
+    monkeypatch, tmp_path: Path
+) -> None:
+    """Regression: a clean data.yaml with empty ``names`` must still resolve
+    labels to canonical KITTI class names so ground truth matches the frozen
+    detector output.
+
+    Without the canonical fallback the clean ground-truth classes become
+    ``class_0..class_7`` while the detector reports ``Car/Pedestrian/...``, so
+    clean mAP50 collapses to 0.
+    """
+    from evaluation import attack_evaluator as ae
+    from models.predictor import DetectionBox, DetectionResult
+
+    weights = tmp_path / "baseline_best.pt"
+    weights.write_bytes(b"fake-weights")
+    clean_yaml = make_yolo_dataset(tmp_path / "clean", "c", 3, include_names=False)
+    random_yaml = make_yolo_dataset(tmp_path / "random", "r", 3)
+    target_yaml = make_yolo_dataset(tmp_path / "target", "t", 3)
+
+    # Give every clean GT a distinct box so the greedy matcher can match all 3.
+    for i, x_center in enumerate((0.2, 0.5, 0.8)):
+        (clean_yaml.parent / "labels" / "val" / f"c_{i:04d}.txt").write_text(
+            f"0 {x_center} 0.5 0.2 0.2\n"
+        )
+
+    class GtMatchingPredictor:
+        """Report every GT box as a perfect detection using detector class names."""
+
+        def __init__(self, wrapper=None, config=None, class_names=None):
+            self.wrapper = wrapper
+
+        def predict_dataset(self, dataset, **kwargs):
+            results = []
+            for sample in dataset:
+                boxes = [
+                    DetectionBox(
+                        class_id=0,
+                        class_name="Car",
+                        confidence=1.0,
+                        bbox=ann.bbox,
+                    )
+                    for ann in sample.annotations
+                ]
+                results.append(
+                    DetectionResult(
+                        sample_id=sample.sample_id,
+                        image_path=sample.image_path,
+                        boxes=boxes,
+                    )
+                )
+            return results
+
+    RecordingWrapper.instances = []
+    monkeypatch.setattr(ae, "YoloWrapper", RecordingWrapper)
+    monkeypatch.setattr(ae, "YoloPredictor", GtMatchingPredictor)
+
+    config = AttackComparisonConfig(
+        weights=weights,
+        clean_data_yaml=clean_yaml,
+        random_data_yaml=random_yaml,
+        target_data_yaml=target_yaml,
+        expected_samples=3,
+    )
+    report = AttackComparisonEvaluator(config).evaluate()
+
+    clean_metrics = report["clean"]["metrics"]
+    assert report["clean"]["num_samples"] == 3
+    assert clean_metrics["mAP50"] == pytest.approx(1.0)
+    assert clean_metrics["mAP50"] > 0.0
+    assert clean_metrics["recall"] == pytest.approx(1.0)

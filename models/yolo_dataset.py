@@ -6,6 +6,8 @@ from typing import Dict, Iterator, List, Sequence, Union
 import yaml
 from PIL import Image
 
+from models.utils import get_default_class_mapping
+
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp"}
 
 
@@ -56,6 +58,12 @@ class YoloDataset(Sequence[YoloSample]):
             root = yaml_path.parent
         names = config.get("names", {})
         class_names: Dict[int, str] = ({index: str(name) for index, name in enumerate(names)} if isinstance(names, list) else {int(index): str(name) for index, name in names.items()})
+        if not class_names:
+            # A generated YOLO dataset always writes these names via
+            # prepare_yolo_dataset(); fall back to that canonical KITTI mapping
+            # so a data.yaml with empty/missing names still maps ground-truth
+            # classes to the same names the detector reports.
+            class_names = {index: name for name, index in get_default_class_mapping().items()}
 
         images: List[Path] = []
         for entry in split_value if isinstance(split_value, list) else [split_value]:
