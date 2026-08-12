@@ -152,7 +152,7 @@ def test_experiment_runner_monkeypatch(monkeypatch, tmp_path):
     shared_dir = fake_outputs / "yolo_dataset"
     shared_dir.mkdir(parents=True, exist_ok=True)
     data_yaml = shared_dir / "data.yaml"
-    data_yaml.write_text("path: {}\ntrain: images/train\nval: images/val\nnames: {}\n".format(str(shared_dir), "{}"))
+    data_yaml.write_text("path: {}\ntrain: images/train\nval: images/val\nnames: {{0: Car}}\n".format(str(shared_dir)))
     # Create minimal images and labels for validation
     (shared_dir / "images" / "train").mkdir(parents=True, exist_ok=True)
     (shared_dir / "images" / "val").mkdir(parents=True, exist_ok=True)

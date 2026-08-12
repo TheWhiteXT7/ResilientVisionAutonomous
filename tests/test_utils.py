@@ -91,8 +91,10 @@ def test_prepare_yolo_dataset_automatic_split_and_imagesets(tmp_path: Path) -> N
 
     assert yaml_content["train"] == "images/train"
     assert yaml_content["val"] == "images/val"
-    assert "names" in yaml_content
-    assert yaml_content["names"][0] == "Car"
+    assert yaml_content["names"] == {
+        class_id: class_name
+        for class_name, class_id in get_default_class_mapping().items()
+    }
 
     # 2. Check ImageSets train.txt and val.txt creation
     imagesets_dir = output_dir / "ImageSets"
@@ -158,3 +160,38 @@ def test_prepare_yolo_dataset_existing_imagesets(tmp_path: Path) -> None:
     assert yaml_path.exists()
     assert len(list((output_dir / "images" / "train").glob("*.png"))) == 2
     assert len(list((output_dir / "images" / "val").glob("*.png"))) == 1
+
+
+def test_prepare_yolo_dataset_rewrites_names_with_default_mapping(tmp_path: Path) -> None:
+    """Regeneration must replace a stale empty names mapping with KITTI classes."""
+    output_dir = tmp_path / "yolo_prepared"
+    output_dir.mkdir()
+    (output_dir / "data.yaml").write_text("names: {}\n", encoding="utf-8")
+
+    yaml_path = prepare_yolo_dataset(dataset=[], output_dir=output_dir)
+
+    yaml_content = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
+    assert yaml_content["names"] == {
+        class_id: class_name
+        for class_name, class_id in get_default_class_mapping().items()
+    }
+
+
+def test_prepare_yolo_dataset_preserves_explicit_class_mapping(tmp_path: Path) -> None:
+    """An explicitly provided mapping must be written unchanged to data.yaml."""
+    class_mapping = {"Vehicle": 2, "Person": 5}
+
+    yaml_path = prepare_yolo_dataset(
+        dataset=[], output_dir=tmp_path / "yolo_prepared", class_mapping=class_mapping
+    )
+
+    yaml_content = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
+    assert yaml_content["names"] == {2: "Vehicle", 5: "Person"}
+
+
+def test_prepare_yolo_dataset_rejects_empty_explicit_class_mapping(tmp_path: Path) -> None:
+    """Do not generate an Ultralytics-invalid ``names: {}`` configuration."""
+    with pytest.raises(ValueError, match="class_mapping must contain at least one class"):
+        prepare_yolo_dataset(
+            dataset=[], output_dir=tmp_path / "yolo_prepared", class_mapping={}
+        )

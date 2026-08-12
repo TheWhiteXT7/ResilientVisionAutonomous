@@ -59,6 +59,19 @@ def _save_json(path: Path, obj: Dict[str, Any]) -> None:
         json.dump(obj, fh, indent=2, default=str)
 
 
+def _data_yaml_has_names(data_yaml: Path) -> bool:
+    """Return whether a YOLO dataset YAML contains a non-empty class mapping."""
+    try:
+        import yaml
+
+        with data_yaml.open("r", encoding="utf-8") as fh:
+            config = yaml.safe_load(fh) or {}
+    except (OSError, yaml.YAMLError):
+        return False
+
+    return bool(config.get("names"))
+
+
 def run_baseline(exp_dir: Path, args: argparse.Namespace) -> Dict[str, Any]:
     """Run the baseline experiment reusing the prepared YOLO dataset.
 
@@ -73,8 +86,11 @@ def run_baseline(exp_dir: Path, args: argparse.Namespace) -> Dict[str, Any]:
     shared_data_yaml = OUTPUTS_DIR / "yolo_dataset" / "data.yaml"
 
     # Ensure a prepared YOLO dataset exists at outputs/yolo_dataset
-    if not shared_data_yaml.exists():
-        logger.info("Shared YOLO dataset not found at %s. Preparing...", shared_data_yaml)
+    if not _data_yaml_has_names(shared_data_yaml):
+        logger.info(
+            "Shared YOLO dataset is missing or has no class names. Preparing %s...",
+            shared_data_yaml,
+        )
         loader = KittiLoader(split="train", load_images=False)
         prepare_yolo_dataset(loader, output_dir=shared_data_yaml.parent)
 

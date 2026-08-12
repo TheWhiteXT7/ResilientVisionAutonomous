@@ -140,8 +140,14 @@ def prepare_yolo_dataset(
             if yaml_candidate.is_file():
                 return yaml_candidate
 
+    # An empty mapping produces ``names: {}``, which is not a trainable
+    # Ultralytics dataset configuration.  Treat it as invalid input instead of
+    # silently persisting a YAML file that will fail later during training.
+    if class_mapping is not None and not class_mapping:
+        raise ValueError("class_mapping must contain at least one class")
+
     cls_map = class_mapping if class_mapping is not None else get_default_class_mapping()
-    names = {idx: name for name, idx in cls_map.items()}
+    names = {class_id: class_name for class_name, class_id in cls_map.items()}
 
     # Resolve splits directory and SplitManager
     kitti_dir: Optional[Path] = getattr(dataset, "kitti_dir", None)
