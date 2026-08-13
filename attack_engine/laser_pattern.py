@@ -1,7 +1,9 @@
 """Data representation of laser spots and pattern layouts."""
 
 from dataclasses import dataclass
-from typing import Iterator, List, Optional, Tuple, Union, overload
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, overload
+
+import numpy as np
 
 
 @dataclass(frozen=True)
@@ -154,3 +156,35 @@ class LaserPattern:
     def __repr__(self) -> str:
         """Return string representation of LaserPattern."""
         return f"LaserPattern(spots_count={len(self._spots)})"
+
+
+class RollingShutterPattern(LaserPattern):
+    """A raster laser exposure produced by rolling-shutter row timing.
+
+    Unlike ``LaserPattern`` spot layouts, this stores a continuous, normalized
+    exposure field. It intentionally contains no synthetic circular spots.
+    """
+
+    def __init__(self, exposure: np.ndarray, metadata: Dict[str, Any]) -> None:
+        super().__init__()
+        array = np.asarray(exposure, dtype=np.float32)
+        if array.ndim != 2 or array.shape[0] <= 0 or array.shape[1] <= 0:
+            raise ValueError("exposure must be a non-empty two-dimensional array.")
+        if not np.isfinite(array).all() or (array < 0.0).any() or (array > 1.0).any():
+            raise ValueError("exposure values must be finite and in range [0.0, 1.0].")
+        self._exposure = array.copy()
+        self._metadata = dict(metadata)
+
+    @property
+    def exposure(self) -> np.ndarray:
+        """Return a copy of the normalized exposure field."""
+        return self._exposure.copy()
+
+    @property
+    def metadata(self) -> Dict[str, Any]:
+        """Return serializable rolling-shutter pattern descriptors."""
+        return dict(self._metadata)
+
+    def __repr__(self) -> str:
+        height, width = self._exposure.shape
+        return f"RollingShutterPattern(size=({width}, {height}))"

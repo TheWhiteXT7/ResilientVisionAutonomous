@@ -56,6 +56,11 @@ class MetadataWriter:
             "pattern_type": str(config.pattern_type),
             "target_class": str(config.target_class),
             "missing_target_policy": str(config.missing_target_policy),
+            "rolling_shutter_start": list(config.rolling_shutter_start),
+            "rolling_shutter_velocity": list(config.rolling_shutter_velocity),
+            "row_readout_time": float(config.row_readout_time),
+            "row_exposure_time": float(config.row_exposure_time),
+            "beam_width": float(config.beam_width),
             "output_dtype": str(config.output_dtype),
         }
 
@@ -63,6 +68,7 @@ class MetadataWriter:
             "sample_id": sample_id,
             "pattern_type": execution_metadata.get("pattern_type", config.pattern_type),
             "spots": spots_data,
+            "pattern_metadata": getattr(pattern, "metadata", {}),
             "seed": config.random_seed,
             "attack_config": config_data,
             "timestamp": execution_metadata.get("timestamp"),

@@ -3,8 +3,10 @@
 import random
 from typing import List, Optional
 
+import numpy as np
+
 from .attack_config import AttackConfig
-from .laser_pattern import LaserPattern, LaserSpot
+from .laser_pattern import LaserPattern, LaserSpot, RollingShutterPattern
 from .target_selection import TargetRegion
 
 
@@ -324,6 +326,44 @@ class PatternGenerator:
             pattern.add_spot(spot)
         return pattern
 
+    def rolling_shutter(self) -> RollingShutterPattern:
+        """Generate a continuous laser exposure field for a rolling shutter.
+
+        Each image row integrates a moving Gaussian beam over that row's own
+        exposure interval. Five deterministic midpoint samples approximate the
+        temporal integration without treating the beam as a set of spots.
+        """
+        start_x, start_y = self.config.rolling_shutter_start
+        velocity_x, velocity_y = self.config.rolling_shutter_velocity
+        row_times = np.arange(self.height, dtype=np.float32) * float(self.config.row_readout_time)
+        sample_offsets = (np.arange(5, dtype=np.float32) + 0.5) / 5.0
+        x_coords = np.arange(self.width, dtype=np.float32)
+        exposure = np.zeros((self.height, self.width), dtype=np.float32)
+        beam_width = float(self.config.beam_width)
+        denominator = 2.0 * beam_width * beam_width
+
+        for offset in sample_offsets:
+            times = row_times + offset * float(self.config.row_exposure_time)
+            centers_x = float(start_x) + float(velocity_x) * times
+            centers_y = float(start_y) + float(velocity_y) * times
+            dx_squared = (x_coords[None, :] - centers_x[:, None]) ** 2
+            dy_squared = (np.arange(self.height, dtype=np.float32) - centers_y) ** 2
+            exposure += np.exp(-(dx_squared + dy_squared[:, None]) / denominator)
+
+        exposure /= float(len(sample_offsets))
+        return RollingShutterPattern(
+            exposure,
+            metadata={
+                "representation": "rolling_shutter_exposure",
+                "image_size": [self.width, self.height],
+                "trajectory_start": [float(start_x), float(start_y)],
+                "trajectory_velocity": [float(velocity_x), float(velocity_y)],
+                "row_readout_time": float(self.config.row_readout_time),
+                "row_exposure_time": float(self.config.row_exposure_time),
+                "beam_width": beam_width,
+            },
+        )
+
     def generate(self, pattern_type: Optional[str] = None, target: Optional[TargetRegion] = None) -> LaserPattern:
         """Dispatch pattern generation according to pattern_type string.
 
@@ -354,11 +394,13 @@ class PatternGenerator:
                     "pattern_type 'targeted' requires a TargetRegion target argument."
                 )
             return self.targeted_spots(target)
+        elif ptype == "rolling_shutter":
+            return self.rolling_shutter()
         elif ptype == "custom":
             return LaserPattern()
         else:
             raise ValueError(
                 f"Unsupported pattern_type '{ptype}'. "
                 "Supported types: 'single', 'random', 'horizontal_line', 'vertical_line', "
-                "'grid', 'targeted', 'targeted_spots', 'custom'."
+                "'grid', 'targeted', 'targeted_spots', 'rolling_shutter', 'custom'."
             )

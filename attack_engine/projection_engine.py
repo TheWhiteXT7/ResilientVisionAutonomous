@@ -1,9 +1,10 @@
 """Projection engine for rendering laser patterns onto PIL images."""
 
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 from .attack_config import AttackConfig
-from .laser_pattern import LaserPattern
+from .laser_pattern import LaserPattern, RollingShutterPattern
 
 
 class ProjectionEngine:
@@ -40,6 +41,22 @@ class ProjectionEngine:
             raise TypeError(f"config must be an AttackConfig instance, got {type(config).__name__}.")
 
         width, height = image.size
+
+        if isinstance(pattern, RollingShutterPattern):
+            exposure = pattern.exposure
+            if exposure.shape != (height, width):
+                raise ValueError(
+                    f"rolling-shutter exposure shape {exposure.shape} does not match image size {(width, height)}."
+                )
+            effective_alpha = np.clip(exposure * float(config.intensity) * float(config.alpha), 0.0, 1.0)
+            overlay_data = np.zeros((height, width, 4), dtype=np.uint8)
+            overlay_data[:, :, :3] = np.asarray(config.laser_color, dtype=np.uint8)
+            overlay_data[:, :, 3] = np.rint(effective_alpha * 255.0).astype(np.uint8)
+            overlay = Image.fromarray(overlay_data, mode="RGBA")
+            if config.blur_radius > 0:
+                overlay = overlay.filter(ImageFilter.GaussianBlur(radius=float(config.blur_radius)))
+            attacked_rgba = Image.alpha_composite(image.convert("RGBA"), overlay)
+            return attacked_rgba.convert(image.mode) if image.mode in ("RGB", "L") else attacked_rgba
 
         # Create RGBA copy of base image to avoid mutating original
         base_rgba = image.convert("RGBA")

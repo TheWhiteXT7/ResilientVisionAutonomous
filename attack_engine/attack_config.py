@@ -22,6 +22,14 @@ class AttackConfig:
         missing_target_policy: Behavior when a 'targeted' attack finds no valid
             target: 'preserve' keeps the original image unchanged and continues
             processing, 'fail' raises TargetSelectionError.
+        rolling_shutter_start: Laser position (x, y) in pixels at the start of
+            the frame readout.
+        rolling_shutter_velocity: Laser velocity (x, y) in pixels per timing
+            unit during the frame readout.
+        row_readout_time: Delay between the start of adjacent row exposures.
+        row_exposure_time: Duration of each row exposure, in the same timing
+            units as row_readout_time.
+        beam_width: Gaussian beam spatial standard deviation in pixels.
     """
 
     laser_color: Tuple[int, int, int] = (255, 0, 0)
@@ -35,6 +43,11 @@ class AttackConfig:
     output_dtype: str = "uint8"
     target_class: str = "Car"
     missing_target_policy: str = "preserve"
+    rolling_shutter_start: Tuple[float, float] = (0.0, 0.0)
+    rolling_shutter_velocity: Tuple[float, float] = (0.0, 0.0)
+    row_readout_time: float = 1.0
+    row_exposure_time: float = 1.0
+    beam_width: float = 5.0
 
     def __post_init__(self) -> None:
         """Validate all parameters upon dataclass initialization.
@@ -122,3 +135,18 @@ class AttackConfig:
                 f"got '{self.missing_target_policy}'."
             )
         object.__setattr__(self, "missing_target_policy", policy)
+
+        for name in ("rolling_shutter_start", "rolling_shutter_velocity"):
+            value = getattr(self, name)
+            if not isinstance(value, (tuple, list)) or len(value) != 2:
+                raise TypeError(f"{name} must be a tuple or list of 2 numbers.")
+            if any(isinstance(component, bool) or not isinstance(component, (int, float)) for component in value):
+                raise TypeError(f"{name} components must be numbers.")
+            object.__setattr__(self, name, (float(value[0]), float(value[1])))
+
+        for name in ("row_readout_time", "row_exposure_time", "beam_width"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise TypeError(f"{name} must be a float or int.")
+            if float(value) <= 0.0:
+                raise ValueError(f"{name} must be greater than 0, got {value}.")

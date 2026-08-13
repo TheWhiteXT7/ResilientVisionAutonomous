@@ -117,7 +117,7 @@ class DatasetGenerator:
 
         # Save metadata
         effective_attack_config = self.pipeline.config
-        if kwargs:
+        if kwargs or ptype != effective_attack_config.pattern_type:
             cfg_dict = {
                 "laser_color": effective_attack_config.laser_color,
                 "intensity": effective_attack_config.intensity,
@@ -130,6 +130,11 @@ class DatasetGenerator:
                 "target_class": effective_attack_config.target_class,
                 "missing_target_policy": effective_attack_config.missing_target_policy,
                 "output_dtype": effective_attack_config.output_dtype,
+                "rolling_shutter_start": effective_attack_config.rolling_shutter_start,
+                "rolling_shutter_velocity": effective_attack_config.rolling_shutter_velocity,
+                "row_readout_time": effective_attack_config.row_readout_time,
+                "row_exposure_time": effective_attack_config.row_exposure_time,
+                "beam_width": effective_attack_config.beam_width,
             }
             cfg_dict.update(kwargs)
             effective_attack_config = AttackConfig(**cfg_dict)

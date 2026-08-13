@@ -37,7 +37,7 @@ The attack engine separates pattern generation (geometry/data) from projection (
 ### Modular Responsibilities
 
 1. **`attack_config.py` (`AttackConfig`)**:
-   - Immutable dataclass storing configuration parameters: laser color (RGB), spot intensity, opacity alpha, Gaussian blur radius, spot radius, max spots, random seed, pattern type, and output dtype.
+   - Immutable dataclass storing configuration parameters: laser color (RGB), spot intensity, opacity alpha, Gaussian blur radius, spot radius, max spots, random seed, pattern type, and output dtype. For `rolling_shutter`, it also stores the beam start position and velocity (pixels per timing unit), row readout/exposure timing, and Gaussian beam width.
    - Enforces parameter validation in `__post_init__`.
 
 2. **`laser_pattern.py` (`LaserSpot`, `LaserPattern`)**:
@@ -47,7 +47,7 @@ The attack engine separates pattern generation (geometry/data) from projection (
 
 3. **`pattern_generator.py` (`PatternGenerator`)**:
    - Dataset-agnostic pattern generator. Computes geometric spot layouts based on canvas dimensions and `AttackConfig`.
-   - Supports pattern strategies: `single_spot`, `random_spots`, `horizontal_line`, `vertical_line`, `grid`, and `custom`.
+   - Supports pattern strategies: `single_spot`, `random_spots`, `horizontal_line`, `vertical_line`, `grid`, `targeted_spots`, `rolling_shutter`, and `custom`. `rolling_shutter` is a continuous raster exposure, integrated per row over a moving Gaussian beam rather than synthesized as spots.
    - Has zero dependency on Pillow and uses isolated random number generators for thread safety and zero global state.
 
 4. **`projection_engine.py` (`ProjectionEngine`)**:

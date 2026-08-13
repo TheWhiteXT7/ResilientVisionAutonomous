@@ -77,7 +77,13 @@ class AttackPipeline:
                 "random_seed": current_config.random_seed,
                 "pattern_type": pattern_type,
                 "target_class": current_config.target_class if target_class is None else target_class,
+                "missing_target_policy": current_config.missing_target_policy,
                 "output_dtype": current_config.output_dtype,
+                "rolling_shutter_start": current_config.rolling_shutter_start,
+                "rolling_shutter_velocity": current_config.rolling_shutter_velocity,
+                "row_readout_time": current_config.row_readout_time,
+                "row_exposure_time": current_config.row_exposure_time,
+                "beam_width": current_config.beam_width,
             }
             config_dict.update(kwargs)
             current_config = AttackConfig(**config_dict)
