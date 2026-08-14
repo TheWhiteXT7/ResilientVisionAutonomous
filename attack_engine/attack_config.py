@@ -59,10 +59,20 @@ class AttackConfig:
     rolling_shutter_artifact_saturation_level: float = 0.75
     rolling_shutter_artifact_bloom_strength: float = 0.35
     rolling_shutter_artifact_bloom_sigma: float = 8.0
-    rolling_shutter_artifact_smear_strength: float = 8.0
+    rolling_shutter_artifact_smear_strength: float = 0.8
     rolling_shutter_artifact_smear_length: int = 72
     rolling_shutter_artifact_spectral_response: Tuple[float, float, float] = (0.72, 1.0, 0.38)
     rolling_shutter_artifact_noise_strength: float = 0.0
+    rolling_shutter_artifact_strength: float = 1.0
+    rolling_shutter_artifact_frequency_regime: str = "freq_mid_narrow"
+    rolling_shutter_artifact_beam_profile: str = "full_frame_gaussian"
+    rolling_shutter_artifact_temporal_frequency: float = 3.0
+    rolling_shutter_artifact_temporal_modulation_amplitude: float = 0.55
+    rolling_shutter_artifact_aliasing_frequency: float = 0.0
+    rolling_shutter_artifact_aliasing_amplitude: float = 0.0
+    rolling_shutter_artifact_spatial_modulation_frequency: float = 1.0
+    rolling_shutter_artifact_random_disturbance_amplitude: float = 0.0
+    rolling_shutter_artifact_nonlinearity: float = 1.0
 
     def __post_init__(self) -> None:
         """Validate all parameters upon dataclass initialization.
@@ -210,3 +220,20 @@ class AttackConfig:
         if profile not in ("constant", "gaussian_pulse"):
             raise ValueError("rolling_shutter_artifact_power_profile must be 'constant' or 'gaussian_pulse'.")
         object.__setattr__(self, "rolling_shutter_artifact_power_profile", profile)
+        for name in (
+            "rolling_shutter_artifact_strength", "rolling_shutter_artifact_temporal_frequency",
+            "rolling_shutter_artifact_temporal_modulation_amplitude", "rolling_shutter_artifact_aliasing_frequency",
+            "rolling_shutter_artifact_aliasing_amplitude", "rolling_shutter_artifact_spatial_modulation_frequency",
+            "rolling_shutter_artifact_random_disturbance_amplitude", "rolling_shutter_artifact_nonlinearity",
+        ):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise TypeError(f"{name} must be a float or int.")
+            if float(value) < 0.0:
+                raise ValueError(f"{name} must be non-negative, got {value}.")
+        if not isinstance(self.rolling_shutter_artifact_frequency_regime, str) or self.rolling_shutter_artifact_frequency_regime.strip() not in (
+            "freq_low_wide", "freq_mid_narrow", "freq_high_fine", "freq_ultra_aliasing", "freq_random_full"
+        ):
+            raise ValueError("rolling_shutter_artifact_frequency_regime is not supported.")
+        if not isinstance(self.rolling_shutter_artifact_beam_profile, str) or self.rolling_shutter_artifact_beam_profile.strip() not in ("full_frame_gaussian", "full_frame_flat"):
+            raise ValueError("rolling_shutter_artifact_beam_profile must be 'full_frame_gaussian' or 'full_frame_flat'.")

@@ -367,7 +367,7 @@ class PatternGenerator:
 
     def rolling_shutter_artifact(self) -> RollingShutterArtifactPattern:
         """Generate continuous row-integrated irradiance for sensor rendering."""
-        irradiance = integrate_rolling_shutter_irradiance(self.width, self.height, self.config)
+        irradiance, diagnostics = integrate_rolling_shutter_irradiance(self.width, self.height, self.config)
         return RollingShutterArtifactPattern(irradiance, metadata={
             "representation": "rolling_shutter_sensor_artifact", "image_size": [self.width, self.height],
             "trajectory_start": list(self.config.rolling_shutter_artifact_start),
@@ -384,7 +384,10 @@ class PatternGenerator:
             "smear_strength": float(self.config.rolling_shutter_artifact_smear_strength),
             "smear_length": self.config.rolling_shutter_artifact_smear_length,
             "spectral_response": list(self.config.rolling_shutter_artifact_spectral_response),
-        })
+            "frequency_regime": self.config.rolling_shutter_artifact_frequency_regime,
+            "temporal_frequency": float(self.config.rolling_shutter_artifact_temporal_frequency),
+            "aliasing_frequency": float(self.config.rolling_shutter_artifact_aliasing_frequency),
+        }, diagnostics=diagnostics)
 
     def generate(self, pattern_type: Optional[str] = None, target: Optional[TargetRegion] = None) -> LaserPattern:
         """Dispatch pattern generation according to pattern_type string.

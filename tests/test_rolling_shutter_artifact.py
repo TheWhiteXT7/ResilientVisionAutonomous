@@ -88,3 +88,61 @@ class TestRollingShutterArtifact(unittest.TestCase):
         self.assertNotIn("spots_count", payload)
         self.assertEqual(payload["attack_config"]["rolling_shutter_artifact_temporal_samples"], 8)
         self.assertEqual(payload["pattern_metadata"]["representation"], "rolling_shutter_sensor_artifact")
+
+    def test_full_frame_frequency_regimes_and_seeded_randomness(self):
+        """Full-frame coverage and physically predicted row-frequency per regime.
+
+        A temporal modulation at frequency f is sampled once per row (row start
+        spaced by row_readout_time), so its dominant row-spatial frequency must be
+        the aliased fold of f * row_readout_time cycles per row, wrapping at the
+        0.5 cycles-per-row Nyquist. Above-Nyquist configurations must therefore
+        reappear at high aliased row-frequencies rather than washing out.
+        """
+        configurations = {
+            "freq_low_wide": {"rolling_shutter_artifact_temporal_frequency": 0.4, "rolling_shutter_artifact_spatial_modulation_frequency": 0.4},
+            "freq_mid_narrow": {"rolling_shutter_artifact_temporal_frequency": 3.0},
+            "freq_high_fine": {"rolling_shutter_artifact_temporal_frequency": 6.25},
+            "freq_ultra_aliasing": {"rolling_shutter_artifact_temporal_frequency": 31.25, "rolling_shutter_artifact_aliasing_frequency": 42.5, "rolling_shutter_artifact_aliasing_amplitude": 0.5},
+            "freq_random_full": {"rolling_shutter_artifact_temporal_frequency": 8.0, "rolling_shutter_artifact_random_disturbance_amplitude": 0.6},
+        }
+        row_readout = self.config.rolling_shutter_artifact_row_readout_time
+        nyquist_hz = 1.0 / (2.0 * row_readout)
+        self.assertGreater(
+            configurations["freq_ultra_aliasing"]["rolling_shutter_artifact_temporal_frequency"], nyquist_hz,
+        )
+        outputs, dominant_bins = {}, {}
+        clean = np.asarray(self.image, dtype=np.float32)
+        for regime, values in configurations.items():
+            attacked, pattern = self.attack(rolling_shutter_artifact_frequency_regime=regime, **values)
+            delta = np.abs(np.asarray(attacked, dtype=np.float32) - clean).mean(axis=2)
+            outputs[regime] = attacked
+            self.assertTrue(np.isfinite(delta).all())
+            self.assertGreater((delta > 2).mean(), 0.70)
+            self.assertGreater(delta.mean(), 5.0)
+            row_profile = pattern.irradiance.mean(axis=1)
+            spectrum = np.abs(np.fft.rfft(row_profile - row_profile.mean()))
+            dominant_bins[regime] = int(np.argmax(spectrum[1:]) + 1)
+            if regime != "freq_random_full":
+                frequency = values["rolling_shutter_artifact_aliasing_frequency"] if regime == "freq_ultra_aliasing" else values["rolling_shutter_artifact_temporal_frequency"]
+                folded = abs((frequency * row_readout) % 1.0)
+                folded = min(folded, 1.0 - folded)
+                predicted_bin = round(folded * self.image.height)
+                self.assertLessEqual(
+                    abs(dominant_bins[regime] - predicted_bin), 8,
+                    msg=f"{regime} dominant row bin {dominant_bins[regime]} must match the aliased fold of "
+                        f"{frequency} Hz at {predicted_bin} (row bins of {self.image.height}).",
+                )
+        self.assertLess(dominant_bins["freq_low_wide"], dominant_bins["freq_mid_narrow"])
+        self.assertLess(dominant_bins["freq_mid_narrow"], dominant_bins["freq_high_fine"])
+        self.assertGreaterEqual(dominant_bins["freq_ultra_aliasing"], dominant_bins["freq_mid_narrow"])
+        for left, right in (
+            ("freq_low_wide", "freq_mid_narrow"), ("freq_low_wide", "freq_high_fine"),
+            ("freq_low_wide", "freq_ultra_aliasing"), ("freq_mid_narrow", "freq_high_fine"),
+            ("freq_mid_narrow", "freq_ultra_aliasing"), ("freq_high_fine", "freq_ultra_aliasing"),
+        ):
+            self.assertNotEqual(outputs[left].tobytes(), outputs[right].tobytes())
+        first, _ = self.attack(rolling_shutter_artifact_frequency_regime="freq_random_full", rolling_shutter_artifact_random_disturbance_amplitude=0.6, random_seed=44)
+        repeated, _ = self.attack(rolling_shutter_artifact_frequency_regime="freq_random_full", rolling_shutter_artifact_random_disturbance_amplitude=0.6, random_seed=44)
+        changed_seed, _ = self.attack(rolling_shutter_artifact_frequency_regime="freq_random_full", rolling_shutter_artifact_random_disturbance_amplitude=0.6, random_seed=45)
+        self.assertEqual(first.tobytes(), repeated.tobytes())
+        self.assertNotEqual(first.tobytes(), changed_seed.tobytes())

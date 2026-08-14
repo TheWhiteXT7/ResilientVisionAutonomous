@@ -47,7 +47,9 @@ class ProjectionEngine:
             irradiance = pattern.irradiance
             if irradiance.shape != (height, width):
                 raise ValueError("rolling-shutter artifact irradiance dimensions do not match image size.")
-            return SensorResponseModel().render(image, irradiance, config)
+            attacked, diagnostics = SensorResponseModel().render(image, irradiance, config)
+            pattern.set_diagnostics(diagnostics)
+            return attacked
 
         if isinstance(pattern, RollingShutterPattern):
             exposure = pattern.exposure

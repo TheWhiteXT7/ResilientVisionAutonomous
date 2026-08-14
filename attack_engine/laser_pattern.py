@@ -193,13 +193,14 @@ class RollingShutterPattern(LaserPattern):
 class RollingShutterArtifactPattern(LaserPattern):
     """Continuous, normalized laser irradiance integrated by rolling-shutter rows."""
 
-    def __init__(self, irradiance: np.ndarray, metadata: Dict[str, Any]) -> None:
+    def __init__(self, irradiance: np.ndarray, metadata: Dict[str, Any], diagnostics: Optional[Dict[str, np.ndarray]] = None) -> None:
         super().__init__()
         field = np.asarray(irradiance, dtype=np.float32)
         if field.ndim != 2 or not field.size or not np.isfinite(field).all() or (field < 0).any():
             raise ValueError("irradiance must be a finite non-negative two-dimensional array.")
         self._irradiance = field.copy()
         self._metadata = dict(metadata)
+        self._diagnostics = {key: np.asarray(value, dtype=np.float32).copy() for key, value in (diagnostics or {}).items()}
 
     @property
     def irradiance(self) -> np.ndarray:
@@ -208,3 +209,10 @@ class RollingShutterArtifactPattern(LaserPattern):
     @property
     def metadata(self) -> Dict[str, Any]:
         return dict(self._metadata)
+
+    @property
+    def diagnostics(self) -> Dict[str, np.ndarray]:
+        return {key: value.copy() for key, value in self._diagnostics.items()}
+
+    def set_diagnostics(self, diagnostics: Dict[str, np.ndarray]) -> None:
+        self._diagnostics.update({key: np.asarray(value, dtype=np.float32).copy() for key, value in diagnostics.items()})
