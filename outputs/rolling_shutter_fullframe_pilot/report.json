@@ -1,0 +1,1617 @@
+{
+  "freq_low_wide": {
+    "low": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.035,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.45,
+        "rolling_shutter_artifact_frequency_regime": "freq_low_wide",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 0.35,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.62,
+        "rolling_shutter_artifact_aliasing_frequency": 0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 0.35,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 34.29399871826172,
+        "affected_pixel_percent": 98.99259259259259,
+        "row_variance": 231.68788146972656,
+        "column_variance": 20.489599227905273,
+        "high_frequency_energy": 37.21918869018555,
+        "saturation_percent": 12.553086419753088,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.035,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_low_wide",
+          "temporal_frequency": 0.35,
+          "aliasing_frequency": 0.0
+        }
+      }
+    },
+    "medium": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.035,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.85,
+        "rolling_shutter_artifact_frequency_regime": "freq_low_wide",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 0.35,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.62,
+        "rolling_shutter_artifact_aliasing_frequency": 0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 0.35,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 55.59136962890625,
+        "affected_pixel_percent": 98.99259259259259,
+        "row_variance": 548.3154296875,
+        "column_variance": 34.189029693603516,
+        "high_frequency_energy": 63.817501068115234,
+        "saturation_percent": 20.107783145464307,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.035,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_low_wide",
+          "temporal_frequency": 0.35,
+          "aliasing_frequency": 0.0
+        }
+      }
+    },
+    "strong": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.035,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 1.3,
+        "rolling_shutter_artifact_frequency_regime": "freq_low_wide",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 0.35,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.62,
+        "rolling_shutter_artifact_aliasing_frequency": 0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 0.35,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 72.326171875,
+        "affected_pixel_percent": 98.99259259259259,
+        "row_variance": 844.1314086914062,
+        "column_variance": 35.00943374633789,
+        "high_frequency_energy": 83.48762512207031,
+        "saturation_percent": 25.353945249597427,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.035,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_low_wide",
+          "temporal_frequency": 0.35,
+          "aliasing_frequency": 0.0
+        }
+      }
+    }
+  },
+  "freq_mid_narrow": {
+    "low": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 645.84,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.035,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.45,
+        "rolling_shutter_artifact_frequency_regime": "freq_mid_narrow",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 2.2,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.72,
+        "rolling_shutter_artifact_aliasing_frequency": 0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 1.5,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 29.19065284729004,
+        "affected_pixel_percent": 98.97777777777777,
+        "row_variance": 201.51829528808594,
+        "column_variance": 21.746660232543945,
+        "high_frequency_energy": 38.61684036254883,
+        "saturation_percent": 13.28695652173913,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 645.84,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.035,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_mid_narrow",
+          "temporal_frequency": 2.2,
+          "aliasing_frequency": 0.0
+        }
+      }
+    },
+    "medium": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 645.84,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.035,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.85,
+        "rolling_shutter_artifact_frequency_regime": "freq_mid_narrow",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 2.2,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.72,
+        "rolling_shutter_artifact_aliasing_frequency": 0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 1.5,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 47.21128463745117,
+        "affected_pixel_percent": 98.99259259259259,
+        "row_variance": 455.3948669433594,
+        "column_variance": 37.88542938232422,
+        "high_frequency_energy": 63.596961975097656,
+        "saturation_percent": 18.906924315619968,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 645.84,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.035,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_mid_narrow",
+          "temporal_frequency": 2.2,
+          "aliasing_frequency": 0.0
+        }
+      }
+    },
+    "strong": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 645.84,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.035,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 1.3,
+        "rolling_shutter_artifact_frequency_regime": "freq_mid_narrow",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 2.2,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.72,
+        "rolling_shutter_artifact_aliasing_frequency": 0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 1.5,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 62.1332893371582,
+        "affected_pixel_percent": 98.99259259259259,
+        "row_variance": 688.8934936523438,
+        "column_variance": 46.23847579956055,
+        "high_frequency_energy": 83.33995819091797,
+        "saturation_percent": 23.31508319914117,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 645.84,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.035,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_mid_narrow",
+          "temporal_frequency": 2.2,
+          "aliasing_frequency": 0.0
+        }
+      }
+    }
+  },
+  "freq_high_fine": {
+    "low": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.014,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.45,
+        "rolling_shutter_artifact_frequency_regime": "freq_high_fine",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 12.0,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.82,
+        "rolling_shutter_artifact_aliasing_frequency": 0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 3.5,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 33.184757232666016,
+        "affected_pixel_percent": 97.6272678475577,
+        "row_variance": 284.1992492675781,
+        "column_variance": 18.187088012695312,
+        "high_frequency_energy": 53.69047927856445,
+        "saturation_percent": 15.141599570585079,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.014,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_high_fine",
+          "temporal_frequency": 12.0,
+          "aliasing_frequency": 0.0
+        }
+      }
+    },
+    "medium": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.014,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.85,
+        "rolling_shutter_artifact_frequency_regime": "freq_high_fine",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 12.0,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.82,
+        "rolling_shutter_artifact_aliasing_frequency": 0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 3.5,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 52.29423904418945,
+        "affected_pixel_percent": 98.6456253354804,
+        "row_variance": 608.7923583984375,
+        "column_variance": 29.385629653930664,
+        "high_frequency_energy": 89.82000732421875,
+        "saturation_percent": 20.772088030059045,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.014,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_high_fine",
+          "temporal_frequency": 12.0,
+          "aliasing_frequency": 0.0
+        }
+      }
+    },
+    "strong": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.014,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 1.3,
+        "rolling_shutter_artifact_frequency_regime": "freq_high_fine",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 12.0,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.82,
+        "rolling_shutter_artifact_aliasing_frequency": 0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 3.5,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 67.48471069335938,
+        "affected_pixel_percent": 98.94664519592055,
+        "row_variance": 888.3906860351562,
+        "column_variance": 38.791786193847656,
+        "high_frequency_energy": 119.08985900878906,
+        "saturation_percent": 24.96425120772947,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.014,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_high_fine",
+          "temporal_frequency": 12.0,
+          "aliasing_frequency": 0.0
+        }
+      }
+    }
+  },
+  "freq_ultra_aliasing": {
+    "low": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.006,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.45,
+        "rolling_shutter_artifact_frequency_regime": "freq_ultra_aliasing",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 34.0,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.72,
+        "rolling_shutter_artifact_aliasing_frequency": 71.0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0.5,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 5.0,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 33.60047149658203,
+        "affected_pixel_percent": 97.82093397745571,
+        "row_variance": 254.19285583496094,
+        "column_variance": 18.859888076782227,
+        "high_frequency_energy": 154.27407836914062,
+        "saturation_percent": 15.271282877079978,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.006,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_ultra_aliasing",
+          "temporal_frequency": 34.0,
+          "aliasing_frequency": 71.0
+        }
+      }
+    },
+    "medium": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.006,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.85,
+        "rolling_shutter_artifact_frequency_regime": "freq_ultra_aliasing",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 34.0,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.72,
+        "rolling_shutter_artifact_aliasing_frequency": 71.0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0.5,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 5.0,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 53.089962005615234,
+        "affected_pixel_percent": 98.77852925389158,
+        "row_variance": 543.3246459960938,
+        "column_variance": 30.83479881286621,
+        "high_frequency_energy": 232.04296875,
+        "saturation_percent": 21.13279656468062,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.006,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_ultra_aliasing",
+          "temporal_frequency": 34.0,
+          "aliasing_frequency": 71.0
+        }
+      }
+    },
+    "strong": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.006,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 1.3,
+        "rolling_shutter_artifact_frequency_regime": "freq_ultra_aliasing",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 34.0,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.72,
+        "rolling_shutter_artifact_aliasing_frequency": 71.0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0.5,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 5.0,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.0,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 68.59243774414062,
+        "affected_pixel_percent": 98.98915727321524,
+        "row_variance": 797.18115234375,
+        "column_variance": 40.47274398803711,
+        "high_frequency_energy": 284.5873107910156,
+        "saturation_percent": 25.366183574879226,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.006,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_ultra_aliasing",
+          "temporal_frequency": 34.0,
+          "aliasing_frequency": 71.0
+        }
+      }
+    }
+  },
+  "freq_random_full": {
+    "low": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.035,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.45,
+        "rolling_shutter_artifact_frequency_regime": "freq_random_full",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 8.0,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.55,
+        "rolling_shutter_artifact_aliasing_frequency": 17.0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0.24,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 2.5,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.55,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 32.97471237182617,
+        "affected_pixel_percent": 98.67418142780463,
+        "row_variance": 156.11053466796875,
+        "column_variance": 21.85946273803711,
+        "high_frequency_energy": 53.032066345214844,
+        "saturation_percent": 15.251100375738059,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.035,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_random_full",
+          "temporal_frequency": 8.0,
+          "aliasing_frequency": 17.0
+        }
+      }
+    },
+    "medium": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.035,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 0.85,
+        "rolling_shutter_artifact_frequency_regime": "freq_random_full",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 8.0,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.55,
+        "rolling_shutter_artifact_aliasing_frequency": 17.0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0.24,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 2.5,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.55,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 52.60829162597656,
+        "affected_pixel_percent": 98.97176596886742,
+        "row_variance": 323.7441711425781,
+        "column_variance": 38.078922271728516,
+        "high_frequency_energy": 84.32936096191406,
+        "saturation_percent": 21.337842190016104,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.035,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_random_full",
+          "temporal_frequency": 8.0,
+          "aliasing_frequency": 17.0
+        }
+      }
+    },
+    "strong": {
+      "config": {
+        "laser_color": [
+          255,
+          0,
+          0
+        ],
+        "intensity": 1.0,
+        "alpha": 0.8,
+        "blur_radius": 5.0,
+        "spot_radius": 15.0,
+        "max_spots": 5,
+        "random_seed": 42,
+        "pattern_type": "rolling_shutter_artifact",
+        "output_dtype": "uint8",
+        "target_class": "Car",
+        "missing_target_policy": "preserve",
+        "rolling_shutter_start": [
+          0.0,
+          0.0
+        ],
+        "rolling_shutter_velocity": [
+          0.0,
+          0.0
+        ],
+        "row_readout_time": 1.0,
+        "row_exposure_time": 1.0,
+        "beam_width": 5.0,
+        "rolling_shutter_artifact_start": [
+          434.7,
+          168.75
+        ],
+        "rolling_shutter_artifact_velocity": [
+          4.0,
+          0.7
+        ],
+        "rolling_shutter_artifact_power": 0.6,
+        "rolling_shutter_artifact_beam_sigma": 931.5,
+        "rolling_shutter_artifact_row_readout_time": 0.01,
+        "rolling_shutter_artifact_row_exposure_time": 0.035,
+        "rolling_shutter_artifact_temporal_samples": 16,
+        "rolling_shutter_artifact_power_profile": "constant",
+        "rolling_shutter_artifact_saturation_level": 0.72,
+        "rolling_shutter_artifact_bloom_strength": 0.3,
+        "rolling_shutter_artifact_bloom_sigma": 10.0,
+        "rolling_shutter_artifact_smear_strength": 0.9,
+        "rolling_shutter_artifact_smear_length": 80,
+        "rolling_shutter_artifact_spectral_response": [
+          0.92,
+          0.94,
+          1.0
+        ],
+        "rolling_shutter_artifact_noise_strength": 0.0,
+        "rolling_shutter_artifact_strength": 1.3,
+        "rolling_shutter_artifact_frequency_regime": "freq_random_full",
+        "rolling_shutter_artifact_beam_profile": "full_frame_gaussian",
+        "rolling_shutter_artifact_temporal_frequency": 8.0,
+        "rolling_shutter_artifact_temporal_modulation_amplitude": 0.55,
+        "rolling_shutter_artifact_aliasing_frequency": 17.0,
+        "rolling_shutter_artifact_aliasing_amplitude": 0.24,
+        "rolling_shutter_artifact_spatial_modulation_frequency": 2.5,
+        "rolling_shutter_artifact_random_disturbance_amplitude": 0.55,
+        "rolling_shutter_artifact_nonlinearity": 1.0
+      },
+      "statistics": {
+        "mean_absolute_difference": 68.51526641845703,
+        "affected_pixel_percent": 98.99259259259259,
+        "row_variance": 479.67529296875,
+        "column_variance": 48.658363342285156,
+        "high_frequency_energy": 106.84355926513672,
+        "saturation_percent": 25.652603327965647,
+        "metadata": {
+          "representation": "rolling_shutter_sensor_artifact",
+          "image_size": [
+            1242,
+            375
+          ],
+          "trajectory_start": [
+            434.7,
+            168.75
+          ],
+          "trajectory_velocity": [
+            4.0,
+            0.7
+          ],
+          "power": 0.6,
+          "beam_sigma": 931.5,
+          "row_readout_time": 0.01,
+          "row_exposure_time": 0.035,
+          "temporal_samples": 16,
+          "power_profile": "constant",
+          "saturation_level": 0.72,
+          "bloom_strength": 0.3,
+          "bloom_sigma": 10.0,
+          "smear_strength": 0.9,
+          "smear_length": 80,
+          "spectral_response": [
+            0.92,
+            0.94,
+            1.0
+          ],
+          "frequency_regime": "freq_random_full",
+          "temporal_frequency": 8.0,
+          "aliasing_frequency": 17.0
+        }
+      }
+    }
+  }
+}
