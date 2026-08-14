@@ -48,6 +48,21 @@ class AttackConfig:
     row_readout_time: float = 1.0
     row_exposure_time: float = 1.0
     beam_width: float = 5.0
+    rolling_shutter_artifact_start: Tuple[float, float] = (620.0, 180.0)
+    rolling_shutter_artifact_velocity: Tuple[float, float] = (6.0, 0.0)
+    rolling_shutter_artifact_power: float = 1.25
+    rolling_shutter_artifact_beam_sigma: float = 10.0
+    rolling_shutter_artifact_row_readout_time: float = 0.02
+    rolling_shutter_artifact_row_exposure_time: float = 0.08
+    rolling_shutter_artifact_temporal_samples: int = 8
+    rolling_shutter_artifact_power_profile: str = "constant"
+    rolling_shutter_artifact_saturation_level: float = 0.75
+    rolling_shutter_artifact_bloom_strength: float = 0.35
+    rolling_shutter_artifact_bloom_sigma: float = 8.0
+    rolling_shutter_artifact_smear_strength: float = 8.0
+    rolling_shutter_artifact_smear_length: int = 72
+    rolling_shutter_artifact_spectral_response: Tuple[float, float, float] = (0.72, 1.0, 0.38)
+    rolling_shutter_artifact_noise_strength: float = 0.0
 
     def __post_init__(self) -> None:
         """Validate all parameters upon dataclass initialization.
@@ -150,3 +165,48 @@ class AttackConfig:
                 raise TypeError(f"{name} must be a float or int.")
             if float(value) <= 0.0:
                 raise ValueError(f"{name} must be greater than 0, got {value}.")
+
+        for name in ("rolling_shutter_artifact_start", "rolling_shutter_artifact_velocity"):
+            value = getattr(self, name)
+            if not isinstance(value, (tuple, list)) or len(value) != 2:
+                raise TypeError(f"{name} must be a tuple or list of 2 numbers.")
+            if any(isinstance(component, bool) or not isinstance(component, (int, float)) for component in value):
+                raise TypeError(f"{name} components must be numbers.")
+            object.__setattr__(self, name, (float(value[0]), float(value[1])))
+        spectrum = self.rolling_shutter_artifact_spectral_response
+        if not isinstance(spectrum, (tuple, list)) or len(spectrum) != 3:
+            raise TypeError("rolling_shutter_artifact_spectral_response must be a tuple or list of 3 numbers.")
+        if any(isinstance(value, bool) or not isinstance(value, (int, float)) or float(value) < 0.0 for value in spectrum):
+            raise ValueError("rolling_shutter_artifact_spectral_response values must be non-negative numbers.")
+        if not any(float(value) > 0.0 for value in spectrum):
+            raise ValueError("rolling_shutter_artifact_spectral_response must contain a positive value.")
+        object.__setattr__(self, "rolling_shutter_artifact_spectral_response", tuple(float(value) for value in spectrum))
+        for name in (
+            "rolling_shutter_artifact_power", "rolling_shutter_artifact_beam_sigma",
+            "rolling_shutter_artifact_row_readout_time", "rolling_shutter_artifact_row_exposure_time",
+            "rolling_shutter_artifact_saturation_level", "rolling_shutter_artifact_bloom_strength",
+            "rolling_shutter_artifact_bloom_sigma", "rolling_shutter_artifact_smear_strength",
+            "rolling_shutter_artifact_noise_strength",
+        ):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise TypeError(f"{name} must be a float or int.")
+            if float(value) < 0.0:
+                raise ValueError(f"{name} must be non-negative, got {value}.")
+        if self.rolling_shutter_artifact_beam_sigma == 0 or self.rolling_shutter_artifact_row_readout_time == 0 or self.rolling_shutter_artifact_row_exposure_time == 0 or self.rolling_shutter_artifact_saturation_level == 0:
+            raise ValueError("artifact beam sigma, timing, and saturation level must be greater than 0.")
+        if isinstance(self.rolling_shutter_artifact_temporal_samples, bool) or not isinstance(self.rolling_shutter_artifact_temporal_samples, int):
+            raise TypeError("rolling_shutter_artifact_temporal_samples must be an integer.")
+        if self.rolling_shutter_artifact_temporal_samples <= 0:
+            raise ValueError("rolling_shutter_artifact_temporal_samples must be greater than 0.")
+        if isinstance(self.rolling_shutter_artifact_smear_length, bool) or not isinstance(self.rolling_shutter_artifact_smear_length, int):
+            raise TypeError("rolling_shutter_artifact_smear_length must be an integer.")
+        if self.rolling_shutter_artifact_smear_length <= 0:
+            raise ValueError("rolling_shutter_artifact_smear_length must be greater than 0.")
+        profile = self.rolling_shutter_artifact_power_profile
+        if not isinstance(profile, str):
+            raise TypeError("rolling_shutter_artifact_power_profile must be a string.")
+        profile = profile.strip().lower()
+        if profile not in ("constant", "gaussian_pulse"):
+            raise ValueError("rolling_shutter_artifact_power_profile must be 'constant' or 'gaussian_pulse'.")
+        object.__setattr__(self, "rolling_shutter_artifact_power_profile", profile)

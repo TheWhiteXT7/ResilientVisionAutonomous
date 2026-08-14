@@ -6,7 +6,8 @@ from typing import List, Optional
 import numpy as np
 
 from .attack_config import AttackConfig
-from .laser_pattern import LaserPattern, LaserSpot, RollingShutterPattern
+from .laser_pattern import LaserPattern, LaserSpot, RollingShutterArtifactPattern, RollingShutterPattern
+from .sensor_artifact import integrate_rolling_shutter_irradiance
 from .target_selection import TargetRegion
 
 
@@ -364,6 +365,27 @@ class PatternGenerator:
             },
         )
 
+    def rolling_shutter_artifact(self) -> RollingShutterArtifactPattern:
+        """Generate continuous row-integrated irradiance for sensor rendering."""
+        irradiance = integrate_rolling_shutter_irradiance(self.width, self.height, self.config)
+        return RollingShutterArtifactPattern(irradiance, metadata={
+            "representation": "rolling_shutter_sensor_artifact", "image_size": [self.width, self.height],
+            "trajectory_start": list(self.config.rolling_shutter_artifact_start),
+            "trajectory_velocity": list(self.config.rolling_shutter_artifact_velocity),
+            "power": float(self.config.rolling_shutter_artifact_power),
+            "beam_sigma": float(self.config.rolling_shutter_artifact_beam_sigma),
+            "row_readout_time": float(self.config.rolling_shutter_artifact_row_readout_time),
+            "row_exposure_time": float(self.config.rolling_shutter_artifact_row_exposure_time),
+            "temporal_samples": self.config.rolling_shutter_artifact_temporal_samples,
+            "power_profile": self.config.rolling_shutter_artifact_power_profile,
+            "saturation_level": float(self.config.rolling_shutter_artifact_saturation_level),
+            "bloom_strength": float(self.config.rolling_shutter_artifact_bloom_strength),
+            "bloom_sigma": float(self.config.rolling_shutter_artifact_bloom_sigma),
+            "smear_strength": float(self.config.rolling_shutter_artifact_smear_strength),
+            "smear_length": self.config.rolling_shutter_artifact_smear_length,
+            "spectral_response": list(self.config.rolling_shutter_artifact_spectral_response),
+        })
+
     def generate(self, pattern_type: Optional[str] = None, target: Optional[TargetRegion] = None) -> LaserPattern:
         """Dispatch pattern generation according to pattern_type string.
 
@@ -396,11 +418,14 @@ class PatternGenerator:
             return self.targeted_spots(target)
         elif ptype == "rolling_shutter":
             return self.rolling_shutter()
+        elif ptype == "rolling_shutter_artifact":
+            return self.rolling_shutter_artifact()
         elif ptype == "custom":
             return LaserPattern()
         else:
             raise ValueError(
                 f"Unsupported pattern_type '{ptype}'. "
                 "Supported types: 'single', 'random', 'horizontal_line', 'vertical_line', "
-                "'grid', 'targeted', 'targeted_spots', 'rolling_shutter', 'custom'."
+                "'grid', 'targeted', 'targeted_spots', 'rolling_shutter', "
+                "'rolling_shutter_artifact', 'custom'."
             )

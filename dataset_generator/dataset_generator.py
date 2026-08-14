@@ -2,6 +2,7 @@
 
 import logging
 import shutil
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -118,7 +119,8 @@ class DatasetGenerator:
         # Save metadata
         effective_attack_config = self.pipeline.config
         if kwargs or ptype != effective_attack_config.pattern_type:
-            cfg_dict = {
+            cfg_dict = asdict(effective_attack_config)
+            cfg_dict.update({
                 "laser_color": effective_attack_config.laser_color,
                 "intensity": effective_attack_config.intensity,
                 "alpha": effective_attack_config.alpha,
@@ -135,7 +137,7 @@ class DatasetGenerator:
                 "row_readout_time": effective_attack_config.row_readout_time,
                 "row_exposure_time": effective_attack_config.row_exposure_time,
                 "beam_width": effective_attack_config.beam_width,
-            }
+            })
             cfg_dict.update(kwargs)
             effective_attack_config = AttackConfig(**cfg_dict)
 

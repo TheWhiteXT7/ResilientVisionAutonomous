@@ -1,5 +1,6 @@
 """High-level attack pipeline orchestrating pattern generation and projection."""
 
+from dataclasses import asdict
 from typing import Any, Optional, Sequence, Tuple
 from PIL import Image
 
@@ -67,7 +68,8 @@ class AttackPipeline:
             or pattern_type != current_config.pattern_type
             or (target_class is not None and target_class != current_config.target_class)
         ):
-            config_dict = {
+            config_dict = asdict(current_config)
+            config_dict.update({
                 "laser_color": current_config.laser_color,
                 "intensity": current_config.intensity,
                 "alpha": current_config.alpha,
@@ -84,7 +86,7 @@ class AttackPipeline:
                 "row_readout_time": current_config.row_readout_time,
                 "row_exposure_time": current_config.row_exposure_time,
                 "beam_width": current_config.beam_width,
-            }
+            })
             config_dict.update(kwargs)
             current_config = AttackConfig(**config_dict)
 

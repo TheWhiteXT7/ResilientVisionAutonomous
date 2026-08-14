@@ -188,3 +188,23 @@ class RollingShutterPattern(LaserPattern):
     def __repr__(self) -> str:
         height, width = self._exposure.shape
         return f"RollingShutterPattern(size=({width}, {height}))"
+
+
+class RollingShutterArtifactPattern(LaserPattern):
+    """Continuous, normalized laser irradiance integrated by rolling-shutter rows."""
+
+    def __init__(self, irradiance: np.ndarray, metadata: Dict[str, Any]) -> None:
+        super().__init__()
+        field = np.asarray(irradiance, dtype=np.float32)
+        if field.ndim != 2 or not field.size or not np.isfinite(field).all() or (field < 0).any():
+            raise ValueError("irradiance must be a finite non-negative two-dimensional array.")
+        self._irradiance = field.copy()
+        self._metadata = dict(metadata)
+
+    @property
+    def irradiance(self) -> np.ndarray:
+        return self._irradiance.copy()
+
+    @property
+    def metadata(self) -> Dict[str, Any]:
+        return dict(self._metadata)

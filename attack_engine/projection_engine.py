@@ -4,7 +4,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 from .attack_config import AttackConfig
-from .laser_pattern import LaserPattern, RollingShutterPattern
+from .laser_pattern import LaserPattern, RollingShutterArtifactPattern, RollingShutterPattern
+from .sensor_artifact import SensorResponseModel
 
 
 class ProjectionEngine:
@@ -41,6 +42,12 @@ class ProjectionEngine:
             raise TypeError(f"config must be an AttackConfig instance, got {type(config).__name__}.")
 
         width, height = image.size
+
+        if isinstance(pattern, RollingShutterArtifactPattern):
+            irradiance = pattern.irradiance
+            if irradiance.shape != (height, width):
+                raise ValueError("rolling-shutter artifact irradiance dimensions do not match image size.")
+            return SensorResponseModel().render(image, irradiance, config)
 
         if isinstance(pattern, RollingShutterPattern):
             exposure = pattern.exposure

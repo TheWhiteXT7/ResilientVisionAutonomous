@@ -1,6 +1,7 @@
 """JSON metadata serialization and writing for dataset generation."""
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, Union
 
@@ -34,7 +35,8 @@ class MetadataWriter:
         output_file = Path(output_path)
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
-        spots_data = [
+        is_sensor_artifact = hasattr(pattern, "irradiance")
+        spots_data = [] if is_sensor_artifact else [
             {
                 "x": float(spot.x),
                 "y": float(spot.y),
@@ -63,17 +65,21 @@ class MetadataWriter:
             "beam_width": float(config.beam_width),
             "output_dtype": str(config.output_dtype),
         }
+        config_data.update({
+            key: value for key, value in asdict(config).items()
+            if key.startswith("rolling_shutter_artifact_")
+        })
 
         payload = {
             "sample_id": sample_id,
             "pattern_type": execution_metadata.get("pattern_type", config.pattern_type),
-            "spots": spots_data,
+            **({} if is_sensor_artifact else {"spots": spots_data}),
             "pattern_metadata": getattr(pattern, "metadata", {}),
             "seed": config.random_seed,
             "attack_config": config_data,
             "timestamp": execution_metadata.get("timestamp"),
             "processing_time_ms": execution_metadata.get("processing_time_ms"),
-            "spots_count": execution_metadata.get("spots_count"),
+            **({} if is_sensor_artifact else {"spots_count": execution_metadata.get("spots_count")}),
             "target_found": execution_metadata.get("target_found"),
             "preserved": execution_metadata.get("preserved"),
             "target": execution_metadata.get("target"),

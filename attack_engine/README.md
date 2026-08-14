@@ -59,6 +59,18 @@ The attack engine separates pattern generation (geometry/data) from projection (
    - High-level orchestrator connecting `PatternGenerator` and `ProjectionEngine`.
    - Exposes top-level `apply_attack(image, pattern_type="random", **kwargs)` API returning `(attacked_image, laser_pattern)`.
 
+### Rolling-shutter sensor artifact
+
+`rolling_shutter_artifact` is the research comparison attack. Legacy spot
+patterns remain deliberately simple baselines; they are not a camera-formation
+model. The artifact attack integrates a moving Gaussian **irradiance** source
+at multiple temporal samples inside each row's rolling-shutter exposure window.
+Its sensor response adds spectrally weighted optical energy, applies nonlinear
+full-well response and clipping, then derives bloom and horizontal charge smear
+from excess/high sensor energy. It therefore does not paint an RGB laser ray or
+red diagonal stroke. Timing, trajectory, beam sigma, power profile, saturation,
+bloom, smear, spectrum, and deterministic noise are all recorded in metadata.
+
 6. **`utils.py`**:
    - Helpers for array/PIL conversions and array pixel operations.
 
