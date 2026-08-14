@@ -63,7 +63,10 @@ def _data_yaml_has_names(data_yaml: Path) -> bool:
     """Return whether a YOLO dataset YAML contains a non-empty class mapping."""
     try:
         import yaml
+    except ImportError:
+        return False
 
+    try:
         with data_yaml.open("r", encoding="utf-8") as fh:
             config = yaml.safe_load(fh) or {}
     except (OSError, yaml.YAMLError):
