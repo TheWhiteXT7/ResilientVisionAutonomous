@@ -204,7 +204,8 @@ if __name__ == "__main__":
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
 
-    max_img = args.max_images or cfg["dataset"]["max_images"]
+    # v7 config has no `dataset:` block; max_images is optional and defaults here.
+    max_img = args.max_images or cfg.get("dataset", {}).get("max_images", 10000)
     out_dir = cfg["paths"]["clean_base"]
 
     download_kitti_from_kaggle(output_dir=out_dir, max_images=max_img)

@@ -34,6 +34,11 @@ from sklearn.metrics import (
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+# Project root (src/evaluation/evaluate.py -> two levels up), used to resolve
+# relative dataset paths from config.yaml - same convention as dataloader/train.
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
 from src.dataset.dataloader import get_dataloaders, get_variation_names, LaserAttackDataset, get_transforms
 from src.models.cnn import build_model
 from src.models.ensemble import load_ensemble
@@ -92,9 +97,12 @@ def evaluate_per_variation(model, cfg: dict, split: str, device: torch.device, i
     Shows which variation is hardest to detect.
     """
     variation_names = get_variation_names(cfg)
-    image_size      = cfg["dataset"]["image_size"]
-    dataset_root    = cfg["paths"]["final_dataset"]
-    csv_path        = os.path.join(dataset_root, "labels.csv")
+    # v7 config schema: image_size lives under `training:`, not a `dataset:` block.
+    image_size      = cfg["training"]["image_size"]
+    dataset_root    = Path(cfg["paths"]["final_dataset"])
+    if not dataset_root.is_absolute():
+        dataset_root = PROJECT_ROOT / dataset_root
+    csv_path        = os.path.join(str(dataset_root), "labels.csv")
     batch_size      = cfg["training"]["batch_size"]
     tfm             = get_transforms(split, image_size)
 
