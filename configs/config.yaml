@@ -1,0 +1,151 @@
+paths:
+  clean_base: data/clean_base        # <-- confirm this matches your real KITTI (or other) image folder
+  final_dataset: data/final_dataset
+  checkpoints: checkpoints           # trained model weights (gitignored)
+  results: results                   # training curves / history JSON (gitignored)
+
+camera:
+  fps: 30.0
+  height: 224
+  width: 224
+  read_noise_std: 2.0
+  full_well: 4000.0
+  exposure_time: 0.001        # 1ms shutter - fallback default only, variations below override this
+  row_jitter_frac: 0.01
+  vignetting_strength: 0.25
+  dead_pixel_prob: 0.0002
+  hot_pixel_prob: 0.0002
+  row_defect_prob: 0.01
+
+ae:
+  enabled: true
+  target_mean: 0.48
+  strength: 0.45
+  min_gain: 0.7
+  max_gain: 1.6
+  iterations: 5
+
+domain_randomization:
+  gamma_range: [1.9, 2.4]
+  jpeg_quality_range: [70, 100]
+  jpeg_prob: 0.4
+  color_temp_shift: 0.08
+  sensor_noise_scale_range: [0.6, 1.6]
+
+split:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+
+variations:
+  - name: clean
+    label: clean
+    clean: true
+    count: 12500
+
+  - name: freq_low_wide
+    label: attack_low
+    count: 12500
+    exposure_time_range: [0.0005, 0.0015]
+    frequency_range: [60, 200]
+    wavelength_choices: [405, 450, 532, 650]
+    power_range: [10, 35]
+    duty_cycle_range: [0.3, 0.7]
+    modulation_choices: [square, sine, triangle]
+    coverage_range: [0.4, 0.95]
+    angle_range: [-15, 15]
+    distance_range: [5, 30]
+    ellipticity_range: [0.5, 1.0]
+    haze_range: [0.0, 0.1]
+    lens_flare_range: [0.0, 0.15]
+
+  - name: freq_mid_narrow
+    label: attack_mid
+    count: 12500
+    exposure_time_range: [0.0001, 0.00035]
+    frequency_range: [200, 800]
+    wavelength_choices: [405, 450, 532, 650, 808]
+    power_range: [10, 40]
+    duty_cycle_range: [0.2, 0.8]
+    modulation_choices: [square, sine, pulse]
+    coverage_range: [0.3, 0.9]
+    angle_range: [-20, 20]
+    distance_range: [5, 40]
+    ellipticity_range: [0.4, 1.0]
+    haze_range: [0.0, 0.12]
+    lens_flare_range: [0.0, 0.2]
+
+  - name: freq_high_fine
+    label: attack_high
+    count: 12500
+    exposure_time_range: [0.00005, 0.00015]
+    frequency_range: [800, 2000]
+    wavelength_choices: [450, 532, 650, 808, 1064]
+    power_range: [10, 45]
+    duty_cycle_range: [0.2, 0.8]
+    modulation_choices: [square, sine, pulse]
+    coverage_range: [0.25, 0.85]
+    angle_range: [-20, 20]
+    distance_range: [5, 45]
+    ellipticity_range: [0.4, 1.0]
+    haze_range: [0.0, 0.12]
+    lens_flare_range: [0.0, 0.2]
+
+  - name: freq_ultra_aliasing
+    label: attack_ultra
+    count: 12500
+    exposure_time_range: [0.00002, 0.00006]
+    frequency_range: [2000, 5000]
+    wavelength_choices: [450, 532, 650, 808]
+    power_range: [15, 50]
+    duty_cycle_range: [0.3, 0.7]
+    modulation_choices: [square, pulse, flicker]
+    coverage_range: [0.3, 0.9]
+    angle_range: [-20, 20]
+    distance_range: [5, 45]
+    ellipticity_range: [0.4, 1.0]
+    haze_range: [0.0, 0.12]
+    lens_flare_range: [0.0, 0.2]
+
+  - name: freq_random_full
+    label: attack_full_range
+    count: 35000
+    exposure_time_range: [0.00002, 0.0001]
+    frequency_range: [60, 5000]
+    wavelength_choices: [405, 450, 488, 532, 650, 808, 1064]
+    power_range: [5, 50]
+    duty_cycle_range: [0.1, 0.9]
+    modulation_choices: [square, sine, triangle, pulse, flicker]
+    coverage_range: [0.2, 1.0]
+    angle_range: [-25, 25]
+    distance_range: [3, 50]
+    ellipticity_range: [0.3, 1.0]
+    haze_range: [0.0, 0.15]
+    lens_flare_range: [0.0, 0.25]
+
+training:
+  image_size: 224
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  # Required by src/training/train.py:
+  epochs: 30
+  patience: 6            # early stopping (epochs without val F1 improvement)
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  loss_type: weighted_ce # weighted_ce | focal (focal_gamma below applies to focal)
+  focal_gamma: 2.0
+  scheduler: cosine      # cosine | step | plateau
+  amp: true              # mixed precision on CUDA
+
+model:
+  backbone: resnet18       # resnet18 | resnet34 | efficientnet_b0
+  pretrained: true
+  dropout: 0.3
+  num_classes: 2
+
+ensemble:
+  strategy: average         # average | weighted | majority_vote
+
+# Total: 12,500 (clean) + 4 x 12,500 (bands: low/mid/high/ultra) + 35,000 (full-range)
+#      = 97,500 images

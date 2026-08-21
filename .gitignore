@@ -1,7 +1,40 @@
-# Python bytecode and tooling
+# ==========================================================
+# ResilientVisionAutonomous — unified ignore policy
+# Covers the original attack/detection pipeline and the
+# imported CNN detection pipeline (src/, configs/, run.py).
+# Datasets, generated outputs and model weights stay on disk
+# but are never tracked by Git.
+# ==========================================================
+
+# ---- Local datasets and raw data (both pipelines) ----
+datasets/
+data/
+
+# ---- Generated outputs (dataset generators, experiments) ----
+outputs/
+results/
+logs/
+test_output/
+
+# ---- Model checkpoints and weights ----
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.engine
+
+# ---- Other large generated artifacts ----
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.rar
+
+# ---- Python bytecode and tooling caches ----
 __pycache__/
 *.py[cod]
-*.pyo
+*$py.class
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -9,21 +42,22 @@ __pycache__/
 coverage.xml
 htmlcov/
 
-# Python and Conda environments
+# ---- Notebook checkpoints ----
+.ipynb_checkpoints/
+
+# ---- Environments ----
 .venv/
 venv/
 env/
 .env/
+.env
+.env.*
+!.env.example
 .conda/
 conda-env/
 conda-meta/
 
-# Local configuration and secrets
-.env
-.env.*
-!.env.example
-
-# IDEs and operating systems
+# ---- IDEs and operating systems ----
 .vscode/
 .idea/
 *.code-workspace
@@ -31,15 +65,3 @@ conda-meta/
 *.swo
 .DS_Store
 Thumbs.db
-
-# Large local datasets and generated artifacts
-datasets/
-outputs/
-checkpoints/
-logs/
-*.ckpt
-*.pth
-*.pt
-
-# Notebook checkpoints
-.ipynb_checkpoints/
