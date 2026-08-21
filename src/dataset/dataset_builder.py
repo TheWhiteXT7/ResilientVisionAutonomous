@@ -133,15 +133,37 @@ def build_env_params(rng: random.Random, var_cfg: dict) -> EnvParams:
     )
 
 
-def assign_split(rng: random.Random, split_cfg: dict) -> str:
-    r = rng.random()
-    train = split_cfg.get("train", 0.7)
-    val = split_cfg.get("val", 0.15)
-    if r < train:
-        return "train"
-    if r < train + val:
-        return "val"
-    return "test"
+def assign_source_splits(paths, split_cfg: dict, seed: int) -> dict:
+    """Assign every unique SOURCE background image to exactly one split.
+
+    Why source-level and not per-generated-image: the builder samples
+    backgrounds with replacement across variations. A random per-image split
+    would let the same KITTI scene appear in train AND test (e.g. clean in
+    train, attacked in test), so a CNN could memorize scenes and report
+    inflated validation/test metrics - classic background leakage.
+
+    Deterministic for a fixed ``seed``; ratios come from the config's
+    ``split:`` block (train/val/test).
+
+    Returns:
+        Dict mapping each source path -> "train" | "val" | "test".
+    """
+    rng = random.Random(f"{seed}-source-splits")
+    order = list(range(len(paths)))
+    rng.shuffle(order)
+    n = len(order)
+    n_train = int(round(n * split_cfg.get("train", 0.7)))
+    n_val = int(round(n * split_cfg.get("val", 0.15)))
+    splits = {}
+    for rank, idx in enumerate(order):
+        if rank < n_train:
+            s = "train"
+        elif rank < n_train + n_val:
+            s = "val"
+        else:
+            s = "test"
+        splits[paths[idx]] = s
+    return splits
 
 
 def build_dataset(config_path, seed: int = 42) -> Path:
@@ -156,6 +178,13 @@ def build_dataset(config_path, seed: int = 42) -> Path:
             project root, so the function works from anywhere.
         seed: base random seed; each variation derives its own deterministic
             sub-seed from this value.
+
+    Split policy:
+        Source-level. Each unique background image is assigned to exactly one
+        of train/val/test (seeded shuffle by ``split:`` ratios) and every
+        generated image inherits that split, so no scene leaks across splits.
+        The source background is recorded per row in labels.csv
+        (``source_path``) for auditability.
 
     Returns:
         Path to the generated dataset directory (paths.final_dataset).
@@ -188,6 +217,15 @@ def build_dataset(config_path, seed: int = 42) -> Path:
     clean_paths = load_clean_images(clean_base)
     print(f"Found {len(clean_paths)} clean background images in {clean_base}")
 
+    # Source-level split: every generated image inherits the split of the
+    # unique background it was built from, so no scene spans two splits.
+    split_of_source = assign_source_splits(clean_paths, split_cfg, seed)
+    n_by_split = {"train": 0, "val": 0, "test": 0}
+    for s in split_of_source.values():
+        n_by_split[s] += 1
+    print(f"Source-level split of backgrounds: "
+          f"train={n_by_split['train']} val={n_by_split['val']} test={n_by_split['test']}")
+
     rng = random.Random(seed)
     sim = RollingShutterSimulator(cam, seed=seed, ae_cfg=ae_cfg)
 
@@ -200,7 +238,7 @@ def build_dataset(config_path, seed: int = 42) -> Path:
         writer.writerow(["path", "label", "split", "variation", "frequency", "wavelength",
                           "power_mw", "duty_cycle", "modulation", "coverage", "angle_deg",
                           "distance_m", "ellipticity", "exposure_time", "ae_gain",
-                          "peak_saturation", "attack_area_fraction"])
+                          "peak_saturation", "attack_area_fraction", "source_path"])
 
         for var_cfg in cfg["variations"]:
             name = var_cfg["name"]
@@ -220,7 +258,7 @@ def build_dataset(config_path, seed: int = 42) -> Path:
                 if bg.shape[:2] != (cam.height, cam.width):
                     bg = cv2.resize(bg, (cam.width, cam.height))
 
-                split = assign_split(rng, split_cfg)
+                split = split_of_source[src_path]
 
                 if is_clean:
                     out = bg.copy()
@@ -249,7 +287,8 @@ def build_dataset(config_path, seed: int = 42) -> Path:
                                   meta["duty_cycle"], meta["modulation"], meta["coverage"],
                                   meta["angle_deg"], meta["distance_m"], meta["ellipticity"], meta["exposure_time"],
                                   meta["ae_gain"], meta["peak_saturation"],
-                                  meta["attack_area_fraction"]])
+                                  meta["attack_area_fraction"],
+                                  str(Path(src_path).relative_to(clean_base))])
                 total_written += 1
 
             print(f"[{name}] done.")
