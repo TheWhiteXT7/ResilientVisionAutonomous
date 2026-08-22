@@ -35,16 +35,16 @@ def main():
 
     # Read both CSVs
     rows = []
-    for src_path, sim_name in [(args.src1, args.sim1), (args.src2, args.sim2)]:
+    for idx, (src_path, sim_name) in enumerate([(args.src1, args.sim1), (args.src2, args.sim2)]):
         src_root = Path(src_path).parent
         with open(src_path, newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                # Prefix variation with simulator to avoid name collision,
-                # EXCEPT for "clean" - keep it as "clean" so dataloader
-                # recognizes it as the negative class.
+                # Only prefix the SECOND dataset's variations (SimB).
+                # The first dataset (v7) stays canonical so ensemble specialist
+                # names match exactly.
                 var = row["variation"]
-                if var != "clean":
+                if idx == 1 and var != "clean":
                     row["variation"] = f"{sim_name}_{var}"
                 row["simulator"] = sim_name
                 rows.append((src_root, row))
