@@ -1,0 +1,97 @@
+# Simulator B full training set (mirrors configs/config.yaml scale).
+#
+# Same physics as simb_eval.yaml but with proper train/val/test splits
+# (no eval_only) so it can be used for training. Source-level split
+# uses the SAME ratios and seed as configs/config.yaml so the test-split
+# backgrounds match exactly — enabling fair cross-simulator evaluation.
+
+paths:
+  clean_base: data/clean_base
+  final_dataset: data/final_dataset_simb_train
+  checkpoints: checkpoints
+  results: results
+
+image_size:
+  height: 224
+  width: 224
+
+split:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+
+variations:
+  - name: clean
+    label: clean
+    clean: true
+    count: 12500
+
+  - name: simb_fine
+    label: attack_high
+    count: 12500
+    band_cycles_range: [50, 110]
+    angle_range: [-35, 35]
+    amplitude_range: [0.08, 0.30]
+    wavelength_choices: [450, 532, 650]
+    envelope_sigma_x_range: [0.25, 0.55]
+    envelope_sigma_y_range: [0.25, 0.55]
+    bloom_sigma_range: [1.0, 3.5]
+    noise_std_range: [2.0, 6.0]
+    exposure_gain_range: [0.9, 1.15]
+
+  - name: simb_coarse
+    label: attack_low
+    count: 12500
+    band_cycles_range: [8, 24]
+    angle_range: [-35, 35]
+    amplitude_range: [0.10, 0.40]
+    wavelength_choices: [405, 532, 808]
+    envelope_sigma_x_range: [0.30, 0.65]
+    envelope_sigma_y_range: [0.30, 0.65]
+    bloom_sigma_range: [1.5, 5.0]
+    noise_std_range: [2.0, 7.0]
+    exposure_gain_range: [0.9, 1.15]
+
+  - name: simb_mixed
+    label: attack_full_range
+    count: 35000
+    band_cycles_range: [20, 90]
+    angle_range: [-45, 45]
+    amplitude_range: [0.05, 0.45]
+    wavelength_choices: [405, 450, 488, 532, 650, 808, 1064]
+    envelope_sigma_x_range: [0.20, 0.70]
+    envelope_sigma_y_range: [0.20, 0.70]
+    bloom_sigma_range: [0.5, 6.0]
+    noise_std_range: [1.5, 8.0]
+    exposure_gain_range: [0.85, 1.2]
+
+# Total: 12,500 clean + 4 x 12,500 + 35,000 = 97,500 images (matches v7 scale)
+
+training:
+  image_size: 224
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  epochs: 30
+  patience: 6
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  loss_type: weighted_ce
+  focal_gamma: 2.0
+  scheduler: cosine
+  amp: true
+
+model:
+  backbone: resnet18
+  pretrained: true
+  dropout: 0.3
+  num_classes: 2
+
+ensemble:
+  strategy: average
+  variations:
+    - freq_low_wide
+    - freq_mid_narrow
+    - freq_high_fine
+    - freq_ultra_aliasing
+    - freq_random_full
