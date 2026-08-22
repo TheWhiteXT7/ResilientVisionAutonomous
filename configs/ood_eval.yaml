@@ -1,0 +1,147 @@
+# Out-of-distribution (OOD) evaluation set for the laser-attack detector.
+#
+# Purpose: measure how the models trained on configs/config.yaml behave when
+# attacked with parameters OUTSIDE everything they saw during training, on
+# background scenes from the held-out test split only.
+#
+# How this differs from the training set:
+#   1. split.eval_only: true  -> generation is restricted to the test-split
+#      background sources of seed 42 and every row is labelled "test".
+#   2. Every attack range below sits OUTSIDE the training support:
+#        ood_slow_flicker : frequencies BELOW the lowest trained band (15-45 Hz
+#                           vs >=60), duty cycle near zero, angles beyond +-25 deg
+#        ood_hyper_freq   : frequencies ABOVE the highest trained band
+#                           (6-11 kHz vs <=5 kHz), power up to 60 mW (trained
+#                           max 50), coverage down to 0.06 (trained min 0.2)
+#        ood_washout_long : mid-band frequencies but exposure windows 20x
+#                           longer than any training exposure (0.003-0.006 s),
+#                           which integrates away stripe contrast
+#   3. Harsher post-processing than training: stronger JPEG degradation
+#      (quality 32-58 @ p=0.75 vs 70-100 @ p=0.4), gamma outside the trained
+#      [1.9, 2.4] window, heavier sensor noise.
+#
+# The honest generalization number for the report comes from running the
+# trained single CNN and ensemble on this set and reporting the drop.
+#
+# NOTE: training/model blocks below are required by run.py --mode evaluate
+# (image size, batch size, backbone) and MUST mirror configs/config.yaml so
+# checkpoints load with the exact architecture they were trained with.
+
+paths:
+  clean_base: data/clean_base
+  final_dataset: data/final_dataset_ood
+  checkpoints: checkpoints
+  results: results
+
+camera:
+  fps: 30.0
+  height: 224
+  width: 224
+  read_noise_std: 2.0
+  full_well: 4000.0
+  exposure_time: 0.001
+  row_jitter_frac: 0.01
+  vignetting_strength: 0.25
+  dead_pixel_prob: 0.0002
+  hot_pixel_prob: 0.0002
+  row_defect_prob: 0.01
+
+ae:
+  enabled: true
+  target_mean: 0.48
+  strength: 0.45
+  min_gain: 0.7
+  max_gain: 1.6
+  iterations: 5
+
+domain_randomization:
+  gamma_range: [1.5, 1.7]
+  jpeg_quality_range: [32, 58]
+  jpeg_prob: 0.75
+  color_temp_shift: 0.08
+  sensor_noise_scale_range: [1.4, 2.2]
+
+split:
+  train: 0.70          # MUST match configs/config.yaml so seed 42 assigns the
+  val: 0.15            # SAME sources to test as the training run did
+  test: 0.15
+  eval_only: true
+
+variations:
+  - name: clean
+    label: clean
+    clean: true
+    count: 400
+
+  - name: ood_slow_flicker
+    label: attack_low
+    count: 500
+    exposure_time_range: [0.0008, 0.002]
+    frequency_range: [15, 45]
+    wavelength_choices: [405, 450, 650]
+    power_range: [5, 25]
+    duty_cycle_range: [0.04, 0.10]
+    modulation_choices: [square, flicker]
+    coverage_range: [0.85, 0.98]
+    angle_range: [28, 38]
+    distance_range: [3, 15]
+    ellipticity_range: [0.6, 1.0]
+    haze_range: [0.0, 0.08]
+    lens_flare_range: [0.0, 0.10]
+
+  - name: ood_hyper_freq
+    label: attack_ultra
+    count: 500
+    exposure_time_range: [0.00002, 0.00004]
+    frequency_range: [6000, 11000]
+    wavelength_choices: [450, 532, 650]
+    power_range: [30, 60]
+    duty_cycle_range: [0.88, 0.96]
+    modulation_choices: [square, pulse]
+    coverage_range: [0.06, 0.16]
+    angle_range: [-38, -26]
+    distance_range: [10, 50]
+    ellipticity_range: [0.35, 0.7]
+    haze_range: [0.0, 0.08]
+    lens_flare_range: [0.0, 0.10]
+
+  - name: ood_washout_long
+    label: attack_mid
+    count: 500
+    exposure_time_range: [0.003, 0.006]
+    frequency_range: [200, 800]
+    wavelength_choices: [450, 532, 650, 808]
+    power_range: [10, 40]
+    duty_cycle_range: [0.4, 0.6]
+    modulation_choices: [square, sine]
+    coverage_range: [0.5, 0.9]
+    angle_range: [-10, 10]
+    distance_range: [5, 30]
+    ellipticity_range: [0.5, 1.0]
+    haze_range: [0.0, 0.10]
+    lens_flare_range: [0.0, 0.15]
+
+# Total: 400 clean + 3 x 500 OOD attacks = 1,900 images (~2 min to generate)
+
+training:
+  image_size: 224
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  epochs: 30            # unused here (no training on OOD data)
+  patience: 6
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  loss_type: weighted_ce
+  focal_gamma: 2.0
+  scheduler: cosine
+  amp: true
+
+model:
+  backbone: resnet18    # must match the trained checkpoints
+  pretrained: true
+  dropout: 0.3
+  num_classes: 2
+
+ensemble:
+  strategy: average

@@ -65,3 +65,7 @@ conda-meta/
 *.swo
 .DS_Store
 Thumbs.db
+
+# machine-local experiment configs
+configs/pilot.yaml
+configs/_*.yaml

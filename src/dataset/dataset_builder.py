@@ -220,6 +220,21 @@ def build_dataset(config_path, seed: int = 42) -> Path:
     # Source-level split: every generated image inherits the split of the
     # unique background it was built from, so no scene spans two splits.
     split_of_source = assign_source_splits(clean_paths, split_cfg, seed)
+
+    # eval_only mode: build an evaluation-only dataset restricted to sources
+    # this seed assigns to the test split, with every row labelled "test".
+    # Used for OOD robustness sets (configs/ood_eval.yaml): the parameter
+    # RANGES are pushed outside training support while the background pool
+    # stays exactly the held-out scenes the model never trained on.
+    if split_cfg.get("eval_only"):
+        test_sources = {p for p, s in split_of_source.items() if s == "test"}
+        clean_paths = [p for p in clean_paths if p in test_sources]
+        if not clean_paths:
+            raise ValueError("eval_only is set but no source was assigned to the test split")
+        print(f"eval_only: restricting generation to the "
+              f"{len(clean_paths)} test-split background sources")
+        split_of_source = {p: "test" for p in clean_paths}
+
     n_by_split = {"train": 0, "val": 0, "test": 0}
     for s in split_of_source.values():
         n_by_split[s] += 1

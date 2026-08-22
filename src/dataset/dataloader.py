@@ -119,6 +119,7 @@ class LaserAttackDataset(Dataset):
         split: str,
         transform,
         variation_filter: Optional[str] = None,
+        allow_empty: bool = False,
     ):
         self.dataset_root = dataset_root
         self.transform = transform
@@ -138,7 +139,7 @@ class LaserAttackDataset(Dataset):
                 abs_path = os.path.join(dataset_root, row["path"])
                 self.samples.append((abs_path, binary_label, variation))
 
-        if len(self.samples) == 0:
+        if len(self.samples) == 0 and not allow_empty:
             raise ValueError(
                 f"No samples found for split='{split}', variation='{variation_filter}'.\n"
                 "Run dataset_builder.py first to generate the dataset."
@@ -203,7 +204,14 @@ def get_dataloaders(cfg: dict, variation_filter: Optional[str] = None) -> Dict[s
             split=split,
             transform=tfm,
             variation_filter=variation_filter,
+            allow_empty=True,
         )
+        if len(dataset) == 0:
+            # Evaluation-only datasets (e.g. configs/ood_eval.yaml) legitimately
+            # contain just one split; callers only index the splits they need.
+            print(f"  [{split:5s}]     0 samples | (empty, loader set to None)")
+            loaders[split] = None
+            continue
         shuffle = (split == "train")
         loader = DataLoader(
             dataset,
@@ -217,6 +225,8 @@ def get_dataloaders(cfg: dict, variation_filter: Optional[str] = None) -> Dict[s
 
     # Log sizes
     for split, loader in loaders.items():
+        if loader is None:
+            continue
         n = len(loader.dataset)
         labels = [s[1] for s in loader.dataset.samples]
         n_pos = sum(labels)
