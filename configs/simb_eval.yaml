@@ -1,0 +1,105 @@
+# Cross-simulator (Simulator B) evaluation set.
+#
+# Measures zero-shot transfer of the v7-trained detector to an INDEPENDENT
+# laser renderer: pure sinusoidal bands parameterised by spatial period
+# (not temporal frequency + exposure), Gaussian beam envelope, global-shutter
+# assumption, and a different sensor/post chain (bloom + read noise + gamma,
+# no JPEG, no AE feedback loop). See src/dataset/simulator_b.py for the
+# deliberate differences vs rolling_shutter_simulator_v7.
+#
+# Backgrounds: seed-42 test-split sources only; every row labelled "test".
+# Any accuracy change vs the OOD numbers measures RENDERER transfer.
+
+paths:
+  clean_base: data/clean_base
+  final_dataset: data/final_dataset_simb
+  checkpoints: checkpoints
+  results: results
+
+image_size:
+  height: 224
+  width: 224
+
+split:
+  train: 0.70          # MUST match configs/config.yaml so seed 42 assigns the
+  val: 0.15            # SAME sources to test as the training run did
+  test: 0.15
+
+variations:
+  - name: clean
+    label: clean
+    clean: true
+    count: 300
+
+  - name: simb_fine
+    label: attack_high
+    count: 350
+    band_cycles_range: [50, 110]        # fine bands, near v7's high/ultra regime
+    angle_range: [-35, 35]
+    amplitude_range: [0.08, 0.30]
+    wavelength_choices: [450, 532, 650]
+    envelope_sigma_x_range: [0.25, 0.55]
+    envelope_sigma_y_range: [0.25, 0.55]
+    bloom_sigma_range: [1.0, 3.5]
+    noise_std_range: [2.0, 6.0]
+    exposure_gain_range: [0.9, 1.15]
+
+  - name: simb_coarse
+    label: attack_low
+    count: 350
+    band_cycles_range: [8, 24]          # broad bands, near v7's low regime
+    angle_range: [-35, 35]
+    amplitude_range: [0.10, 0.40]
+    wavelength_choices: [405, 532, 808]
+    envelope_sigma_x_range: [0.30, 0.65]
+    envelope_sigma_y_range: [0.30, 0.65]
+    bloom_sigma_range: [1.5, 5.0]
+    noise_std_range: [2.0, 7.0]
+    exposure_gain_range: [0.9, 1.15]
+
+  - name: simb_mixed
+    label: attack_full_range
+    count: 350
+    band_cycles_range: [20, 90]
+    angle_range: [-45, 45]
+    amplitude_range: [0.05, 0.45]
+    wavelength_choices: [405, 450, 488, 532, 650, 808, 1064]
+    envelope_sigma_x_range: [0.20, 0.70]
+    envelope_sigma_y_range: [0.20, 0.70]
+    bloom_sigma_range: [0.5, 6.0]
+    noise_std_range: [1.5, 8.0]
+    exposure_gain_range: [0.85, 1.2]
+
+# Total: 300 clean + 3 x 350 = 1,350 images (~1-2 min to generate)
+
+training:
+  image_size: 224
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  epochs: 30            # unused here (no training on Simulator B data)
+  patience: 6
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  loss_type: weighted_ce
+  focal_gamma: 2.0
+  scheduler: cosine
+  amp: true
+
+model:
+  backbone: resnet18    # must match the trained checkpoints
+  pretrained: true
+  dropout: 0.3
+  num_classes: 2
+
+ensemble:
+  strategy: average
+  # Point at the specialists trained on configs/config.yaml (see note in
+  # configs/ood_eval.yaml). Deployment semantics: the full trained ensemble
+  # applied unchanged to a renderer it has never seen.
+  variations:
+    - freq_low_wide
+    - freq_mid_narrow
+    - freq_high_fine
+    - freq_ultra_aliasing
+    - freq_random_full
