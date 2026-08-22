@@ -40,9 +40,12 @@ def main():
         with open(src_path, newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                # Prefix variation with simulator to avoid any name collision
-                # (they already differ: freq_* vs simb_*, but prefix for safety)
-                row["variation"] = f"{sim_name}_{row['variation']}"
+                # Prefix variation with simulator to avoid name collision,
+                # EXCEPT for "clean" - keep it as "clean" so dataloader
+                # recognizes it as the negative class.
+                var = row["variation"]
+                if var != "clean":
+                    row["variation"] = f"{sim_name}_{var}"
                 row["simulator"] = sim_name
                 rows.append((src_root, row))
 
