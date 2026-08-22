@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 # relative dataset paths from config.yaml - same convention as dataloader/train.
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-from src.dataset.dataloader import get_dataloaders, get_variation_names, LaserAttackDataset, get_transforms
+from src.dataset.dataloader import get_dataloaders, get_variation_names, get_ensemble_variation_names, LaserAttackDataset, get_transforms
 from src.models.cnn import build_model
 from src.models.ensemble import load_ensemble
 from src.utils.logger import get_logger
@@ -169,7 +169,7 @@ def compare_single_vs_ensemble(cfg: dict):
     # ── Ensemble ───────────────────────────────────────────────────────────
     try:
         logger.info("\nEvaluating Ensemble CNN...")
-        ensemble = load_ensemble(variation_names, ckpt_dir, cfg, device)
+        ensemble = load_ensemble(get_ensemble_variation_names(cfg), ckpt_dir, cfg, device)
         m = evaluate_model(ensemble, loaders["test"], device, is_ensemble=True)
         results["Ensemble"] = m
         print_full_report(m, "Ensemble CNN", "test")
@@ -236,7 +236,7 @@ if __name__ == "__main__":
             evaluate_per_variation(model, cfg, args.split, device, is_ensemble=False)
 
         else:
-            ensemble = load_ensemble(variation_names, ckpt_dir, cfg, device)
+            ensemble = load_ensemble(get_ensemble_variation_names(cfg), ckpt_dir, cfg, device)
             m = evaluate_model(ensemble, loaders[args.split], device, is_ensemble=True)
             print_full_report(m, "Ensemble CNN", args.split)
 

@@ -127,7 +127,7 @@ def main():
         except ImportError:
             _not_implemented("evaluate", "src/evaluation/evaluate.py")
         import torch
-        from src.dataset.dataloader import get_dataloaders, get_variation_names
+        from src.dataset.dataloader import get_dataloaders, get_variation_names, get_ensemble_variation_names
 
         device   = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         loaders  = get_dataloaders(cfg, variation_filter=None)
@@ -144,7 +144,7 @@ def main():
             evaluate_per_variation(model, cfg, args.split, device, is_ensemble=False)
         else:
             from src.models.ensemble import load_ensemble
-            ensemble = load_ensemble(get_variation_names(cfg), ckpt_dir, cfg, device)
+            ensemble = load_ensemble(get_ensemble_variation_names(cfg), ckpt_dir, cfg, device)
             m = evaluate_model(ensemble, loaders[args.split], device, is_ensemble=True)
             print_full_report(m, "Ensemble CNN", args.split)
             evaluate_per_variation(ensemble, cfg, args.split, device, is_ensemble=True)

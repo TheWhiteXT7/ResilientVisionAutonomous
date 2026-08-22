@@ -145,3 +145,13 @@ model:
 
 ensemble:
   strategy: average
+  # This config's variations (ood_*) are NOT training variation names, so
+  # point explicitly at the five specialists trained on configs/config.yaml.
+  # Deployment semantics: the full trained ensemble, applied unchanged to
+  # attack types it has never seen.
+  variations:
+    - freq_low_wide
+    - freq_mid_narrow
+    - freq_high_fine
+    - freq_ultra_aliasing
+    - freq_random_full

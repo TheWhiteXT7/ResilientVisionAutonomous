@@ -240,3 +240,16 @@ def get_variation_names(cfg: dict) -> list:
     Reads the top-level `variations:` list that dataset_builder.py uses,
     not a `dataset.variations` dict - that key no longer exists in v7."""
     return [v["name"] for v in cfg["variations"] if not v.get("clean", False)]
+
+
+def get_ensemble_variation_names(cfg: dict) -> list:
+    """Variation names identifying WHICH specialist checkpoints to load.
+
+    Defaults to the config's own attack variations. Evaluation configs that
+    use different variation names than training (e.g. configs/ood_eval.yaml
+    with its ood_* variations) can override via `ensemble.variations:` to
+    point at the specialist checkpoints trained on the original config."""
+    explicit = cfg.get("ensemble", {}).get("variations")
+    if explicit:
+        return list(explicit)
+    return get_variation_names(cfg)
