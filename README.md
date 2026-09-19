@@ -168,6 +168,33 @@ python run.py --mode compare
 python audit_pixels.py --dataset data/final_dataset --samples 15
 ```
 
+### Cross-simulator experiment (v7 + SimB)
+
+The repository also contains a deliberately independent renderer, **SimB**, for
+testing whether a detector learns attack evidence rather than artifacts unique
+to the v7 renderer. Generate the held-out SimB evaluation set and apply an
+unchanged v7 checkpoint to it for a zero-shot transfer measurement. To train on
+both renderers, generate the full SimB set, merge it with the v7 data, then use
+the multi-simulator configuration:
+
+```bash
+# SimB data generation (the training-scale config is intentionally large)
+python src/dataset/simb_builder.py --config configs/simb_train.yaml --seed 42
+
+# Preserve v7 variation names for its ensemble specialists; SimB attack names
+# are prefixed with "simb_", while clean remains the shared negative class.
+python scripts/merge_datasets.py \
+  --src1 data/final_dataset/labels.csv \
+  --src2 data/final_dataset_simb_train/labels.csv \
+  --out data/final_dataset_multisim --sim1 v7 --sim2 simb
+
+python run.py --config configs/train_multisim.yaml --mode train --model single
+python run.py --config configs/train_multisim.yaml --mode train --model ensemble
+```
+
+`configs/simb_eval.yaml` is for renderer-transfer evaluation only: it uses the
+same seed-consistent held-out source scenes and must not be mixed into training.
+
 ## Pipeline 2 — Attack generation and YOLO robustness (original project)
 
 This pipeline measures how laser attacks affect an Ultralytics YOLOv8 detector.

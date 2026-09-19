@@ -161,8 +161,9 @@ ensemble:
     - freq_ultra_aliasing
     - freq_random_full
 
-# NOTE: The actual dataset at data/final_dataset_multisim contains
-# BOTH v7 and SimB variations (prefixed v7_ and simb_). This config's
-# variations list only controls which specialists the ensemble trains
-# and which per-variation breakdowns are printed. The dataloader reads
-# ALL variations present in the merged labels.csv automatically.
+# NOTE: The merged dataset keeps the original v7 variation names so the
+# specialist names above continue to match them. Only non-clean SimB
+# variations are prefixed (for example, ``simb_fine``); clean stays ``clean``
+# for both renderers. This config's variations list controls which specialists
+# the ensemble trains and which per-variation breakdowns are printed. The
+# dataloader reads ALL variations present in the merged labels.csv.

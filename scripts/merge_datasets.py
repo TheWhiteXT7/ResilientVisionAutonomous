@@ -1,8 +1,10 @@
 """
-Merge two v7-format datasets into one for multi-simulator training.
-===================================================================
+Merge v7-CSV-compatible datasets into one for multi-simulator training.
+====================================================================
 Reads two labels.csv files, copies images into a new merged directory,
-and writes a combined labels.csv with an extra `simulator` column.
+and writes a combined labels.csv with an extra `simulator` column. The first
+dataset's variation names are retained for v7 ensemble-specialist compatibility;
+only non-clean variations from the second dataset are simulator-prefixed.
 
 Usage:
     python scripts/merge_datasets.py \
@@ -44,7 +46,10 @@ def main():
                 # The first dataset (v7) stays canonical so ensemble specialist
                 # names match exactly.
                 var = row["variation"]
-                if idx == 1 and var != "clean":
+                # SimB configs may already use simulator-qualified names
+                # (``simb_fine``). Avoid producing ``simb_simb_fine`` while
+                # still namespacing generic second-source variations.
+                if idx == 1 and var != "clean" and not var.startswith(f"{sim_name}_"):
                     row["variation"] = f"{sim_name}_{var}"
                 row["simulator"] = sim_name
                 rows.append((src_root, row))

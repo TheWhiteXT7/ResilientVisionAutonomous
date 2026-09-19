@@ -2,9 +2,73 @@ import json
 import os
 from pathlib import Path
 import builtins
+import csv
+import sys
 
 import pytest
 from PIL import Image
+
+
+def test_merge_datasets_keeps_v7_variations_and_prefixes_simb(monkeypatch, tmp_path):
+    """The v7 ensemble names stay canonical; SimB attacks remain distinguishable."""
+    from scripts import merge_datasets
+
+    fields = [
+        "path", "label", "split", "variation", "frequency", "wavelength",
+        "power_mw", "duty_cycle", "modulation", "coverage", "angle_deg",
+        "distance_m", "ellipticity", "exposure_time", "ae_gain",
+        "peak_saturation", "attack_area_fraction", "source_path",
+    ]
+
+    def write_source(root, rows):
+        for row in rows:
+            image_path = root / row["path"]
+            image_path.parent.mkdir(parents=True, exist_ok=True)
+            Image.new("RGB", (2, 2)).save(image_path)
+        labels = root / "labels.csv"
+        with labels.open("w", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(rows)
+        return labels
+
+    def row(path, variation):
+        return {field: "0" for field in fields} | {
+            "path": path, "label": "clean" if variation == "clean" else "attack",
+            "split": "train", "variation": variation, "source_path": "source.png",
+        }
+
+    v7_csv = write_source(tmp_path / "v7", [
+        row("clean/v7_clean.png", "clean"),
+        row("freq_low_wide/v7_attack.png", "freq_low_wide"),
+    ])
+    simb_csv = write_source(tmp_path / "simb", [
+        row("clean/simb_clean.png", "clean"),
+        row("simb_fine/simb_attack.png", "simb_fine"),
+    ])
+    out_dir = tmp_path / "merged"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["merge_datasets.py", "--src1", str(v7_csv), "--src2", str(simb_csv),
+         "--out", str(out_dir)],
+    )
+
+    merge_datasets.main()
+
+    with (out_dir / "labels.csv").open(newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    variations_by_simulator = {
+        row["simulator"]: set() for row in rows
+    }
+    for row in rows:
+        variations_by_simulator[row["simulator"]].add(row["variation"])
+
+    assert variations_by_simulator == {
+        "v7": {"clean", "freq_low_wide"},
+        "simb": {"clean", "simb_fine"},
+    }
+    assert all((out_dir / row["path"]).is_file() for row in rows)
 
 
 def test_compare_models(tmp_path):
